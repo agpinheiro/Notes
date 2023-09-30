@@ -3,12 +3,14 @@ import {
   FlatList,
   Image,
   ListRenderItem,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import {theme} from '../../theme/theme';
+import {Icon} from '@rneui/themed';
 
 export interface Task {
   id: string;
@@ -25,7 +27,7 @@ interface Props {
 interface ColorProps {
   color: string;
   border: string;
-  text: 'OK!' | '';
+  icon: boolean;
   colorText: string;
   decoration: 'line-through' | 'none';
 }
@@ -37,7 +39,7 @@ const List: React.FC<Props> = ({tasks, onPress, onDone}) => {
         const colors: ColorProps = {
           color: theme.colors.purple_dark,
           border: theme.colors.purple_dark,
-          text: 'OK!',
+          icon: true,
           colorText: theme.colors.gray200,
           decoration: 'line-through',
         };
@@ -46,7 +48,7 @@ const List: React.FC<Props> = ({tasks, onPress, onDone}) => {
       const colors: ColorProps = {
         color: theme.colors.gray,
         border: theme.colors.blue_dark,
-        text: '',
+        icon: false,
         colorText: theme.colors.white,
         decoration: 'none',
       };
@@ -61,19 +63,34 @@ const List: React.FC<Props> = ({tasks, onPress, onDone}) => {
             styles.check,
             {backgroundColor: color.color, borderColor: color.border},
           ]}>
-          <Text style={styles.ok}>{color.text}</Text>
+          {color.icon && (
+            <Icon
+              name="check"
+              type="feather"
+              size={20}
+              color={theme.colors.white}
+            />
+          )}
         </TouchableOpacity>
 
         <Text
+          numberOfLines={2}
           style={[
             styles.text,
             {color: color.colorText, textDecorationLine: color.decoration},
           ]}>
           {item.task}
         </Text>
-        <TouchableOpacity onPress={() => onPress(item.id)}>
-          <Text style={styles.trash}>🗑️</Text>
-        </TouchableOpacity>
+        <Pressable onPress={() => onPress(item.id)}>
+          {({pressed}) => (
+            <Icon
+              name="trash"
+              type="font-awesome"
+              size={30}
+              color={pressed ? theme.colors.danger : theme.colors.white}
+            />
+          )}
+        </Pressable>
       </View>
     );
   };

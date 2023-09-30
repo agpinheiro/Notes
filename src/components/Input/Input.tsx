@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import {theme} from '../../theme/theme';
+import {Icon} from '@rneui/themed';
 
 export interface InputProps {
   task: string;
@@ -52,7 +53,12 @@ const Input: React.FC<InputProps> = ({task, setTask, onPress}) => {
           activeOpacity={0.7}
           onPress={handleAddTask}
           style={styles.button}>
-          <Text style={styles.text}>+</Text>
+          <Icon
+            name="pluscircleo"
+            type="antdesign"
+            size={24}
+            color={theme.colors.white}
+          />
         </TouchableOpacity>
       </View>
       {danger && (
@@ -104,9 +110,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: theme.screnn.h * 0.06,
     height: theme.screnn.h * 0.06,
-  },
-  text: {
-    color: theme.colors.white,
-    fontSize: 32,
-  },
+  }
 });

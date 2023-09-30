@@ -1,5 +1,5 @@
-import { MMKV } from 'react-native-mmkv';
-import { Task } from '../components/List/List';
+import {MMKV} from 'react-native-mmkv';
+import {Task} from '../components/List/List';
 
 export const storage = new MMKV({
   id: `user-storage`,
@@ -24,9 +24,9 @@ export const deleteStorage = (key: string) => {
 
 export const deleteItemStorage = (key: string, id: string) => {
   const json = getStorage(key)
-  if (json.length > 0) {
-    const temp = json.filter((item: any) => item.id !== id);
-    setStorage('tasks', temp);
+  if (json.length >= 0) {
+    const temp = json.filter((item: Task) => item.id !== id);
+    setStorage(key, temp);
     return temp;
   }
   return [];
@@ -40,6 +40,6 @@ export const updateStorageTask = (key: string, task: Task, tasks: Task[]) => {
     }
     return item;
   })
-  setStorage('tasks', data);
+  setStorage(key, data);
   return data;
 }
