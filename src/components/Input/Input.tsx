@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {Dispatch, SetStateAction, useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,28 +8,58 @@ import {
 } from 'react-native';
 import {theme} from '../../theme/theme';
 
-// import { Container } from './styles';
+export interface InputProps {
+  task: string;
+  setTask: (text: string) => void | Dispatch<SetStateAction<string>>;
+  onPress: () => void;
+}
+const Input: React.FC<InputProps> = ({task, setTask, onPress}) => {
+  const [danger, setDanger] = useState(false);
 
-const Input: React.FC = () => {
-  const [task, setTask] = useState('');
+  const handleAddTask = () => {
+    if (task.length < 1) {
+      setDanger(true);
+      return;
+    }
+    onPress();
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDanger(false);
+    }, 4000);
+
+    return () => clearTimeout(timeout);
+  }, [danger]);
+
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.containerInput,
-          task.length > 0 ? styles.borderInput : null,
-        ]}>
-        <TextInput
-          onChangeText={setTask}
-          value={task}
-          placeholderTextColor={theme.colors.gray300}
-          placeholder="Adicione uma nova tarefa"
-          style={styles.input}
-        />
+      <View style={styles.row}>
+        <View
+          style={[
+            styles.containerInput,
+            task.length > 0 ? styles.borderInput : null,
+          ]}>
+          <TextInput
+            onChangeText={setTask}
+            value={task}
+            placeholderTextColor={theme.colors.gray300}
+            placeholder="Adicione uma nova tarefa"
+            style={styles.input}
+          />
+        </View>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={handleAddTask}
+          style={styles.button}>
+          <Text style={styles.text}>+</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.text}>+</Text>
-      </TouchableOpacity>
+      {danger && (
+        <Text style={styles.containerDanger}>
+          Texto vazio não pode ser adicionado a lista!
+        </Text>
+      )}
     </View>
   );
 };
@@ -40,11 +70,18 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
     width: '100%',
-    flexDirection: 'row',
     position: 'absolute',
     height: theme.screnn.h * 0.06,
     bottom: (-theme.screnn.h * 0.06) / 2,
+  },
+  row: {
+    flexDirection: 'row',
     justifyContent: 'space-around',
+  },
+  containerDanger: {
+    color: theme.colors.danger,
+    marginLeft: 10,
+    fontSize: 12,
   },
   containerInput: {
     width: '80%',
@@ -70,6 +107,6 @@ const styles = StyleSheet.create({
   },
   text: {
     color: theme.colors.white,
-    fontSize: 28,
+    fontSize: 32,
   },
 });

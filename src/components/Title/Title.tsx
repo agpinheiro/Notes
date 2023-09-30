@@ -16,11 +16,20 @@ const Row = ({name, number, color}: RowProps) => {
   );
 };
 
-const Title: React.FC = () => {
+interface TitleProps {
+  createNumber: number;
+  doneNumber: number;
+}
+
+const Title: React.FC<TitleProps> = ({createNumber, doneNumber}) => {
   return (
     <View style={styles.container}>
-      <Row color={theme.colors.blue} name="Criadas" number={0} />
-      <Row color={theme.colors.purple_dark} name="Concluídas" number={1} />
+      <Row color={theme.colors.blue} name="Criadas" number={createNumber} />
+      <Row
+        color={theme.colors.purple_dark}
+        name="Concluídas"
+        number={doneNumber}
+      />
     </View>
   );
 };
@@ -31,7 +40,7 @@ const styles = StyleSheet.create({
   container: {
     borderBottomWidth: 1,
     borderColor: theme.colors.gray200,
-    marginTop: '8%',
+    marginTop: '10%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginHorizontal: 20,

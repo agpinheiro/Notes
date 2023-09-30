@@ -1,16 +1,16 @@
 import React from 'react';
-import {View, Image, StyleSheet} from 'react-native';
-import logo from '../../assets/logo.png';
-import Input from '../Input/Input';
+import {View, StyleSheet, Text} from 'react-native';
+import Input, {InputProps} from '../Input/Input';
 import {theme} from '../../theme/theme';
 
-// import { Container } from './styles';
-
-const Header: React.FC = () => {
+const Header: React.FC<InputProps> = ({task, setTask, onPress}) => {
   return (
     <View style={styles.container}>
-      <Image style={styles.img} source={logo} resizeMode="contain" />
-      <Input />
+      <View style={styles.row}>
+        <Text style={[styles.text, styles.textBlue]}>NO</Text>
+        <Text style={[styles.text, styles.textPurple]}>TES</Text>
+      </View>
+      <Input task={task} setTask={setTask} onPress={onPress} />
     </View>
   );
 };
@@ -25,5 +25,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  img: {marginBottom: 20, width: 180},
+  row: {
+    flexDirection: 'row',
+  },
+  text: {
+    color: theme.colors.white,
+    fontSize: 50,
+    fontWeight: '900',
+  },
+  textBlue: {
+    color: theme.colors.blue_dark,
+    textDecorationLine: 'underline',
+  },
+  textPurple: {
+    color: theme.colors.purple_dark,
+    textDecorationLine: 'underline',
+  },
 });
