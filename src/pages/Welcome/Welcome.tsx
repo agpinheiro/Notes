@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Image, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { RouteProps } from '../../routes/Routes';
 import Container from '../../components/Cotainer/Container';
 import Logo from '../../assets/logo.svg';

@@ -17,7 +17,6 @@ type NavProps = RouteProps<'Notes'>;
 
 const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const key: string = route.params || '';
-  console.log(key);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const [task, setTask] = useState('');
