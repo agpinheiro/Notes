@@ -5,13 +5,13 @@ This is the repository for the Notes project, a React Native application created
 # Project Images
 
 1. **Welcome Screen:**
-   ![Welcome](https://drive.google.com/file/d/1ICD-f8QowpH9NeHD5z1VDcm_EIv4zZLr/view?usp=sharing)
+   ![Welcome](https://github.com/agpinheiro/Notes/blob/f80513f5874539793308eb3c0395d5cf14606e6f/public/03.mp4)
 
 2. **Main Screen:**
-   ![Main](https://drive.google.com/file/d/17IikmScDZOrAEjexLWKoBtEa_meqEmr7/view?usp=sharing)
+   ![Main](https://github.com/agpinheiro/Notes/blob/f80513f5874539793308eb3c0395d5cf14606e6f/public/01.jpeg)
 
 3. **Notes Screen:**
-   ![Notes](https://drive.google.com/file/d/1YPnLMaYhmR1Jc9PiCh3FJb0oV5oYisOk/view?usp=sharing)
+   ![Notes](https://github.com/agpinheiro/Notes/blob/f80513f5874539793308eb3c0395d5cf14606e6f/public/02.jpeg)
 
 # Used Libraries
 
