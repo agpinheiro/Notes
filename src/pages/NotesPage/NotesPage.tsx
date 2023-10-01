@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Title from '../../components/Title/Title';
-import List, { Task } from '../../components/List/List';
+import List, { Task } from './components/List/List';
 import {
   deleteItemStorage,
   getStorage,
@@ -10,21 +10,42 @@ import {
 import Header from '../../components/Header/Header';
 import Container from '../../components/Cotainer/Container';
 import { RouteProps } from '../../routes/Routes';
+import { DangerProps } from '../../components/Input/Input';
+import { BackHandler } from 'react-native';
 
-type NavProps = RouteProps<'Note'>;
+type NavProps = RouteProps<'Notes'>;
 
 const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
-  const key: string = route.params;
+  const key: string = route.params || '';
+  console.log(key);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const [task, setTask] = useState('');
   useEffect(() => {
-    if (!key || typeof key !== 'string') navigation.navigate('Main');
+    if (key === '') {
+      navigation.navigate('Main');
+    }
     const data = getStorage(key);
     setTasks(data);
+
     return () => {
       setTasks([]);
       setTask('');
     };
+  }, []);
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.goBack();
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
   }, []);
 
   const handleAddToStorage = () => {
@@ -54,21 +75,25 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   };
   return (
     <Container>
-      <Header
-        titlePart1="NO"
-        titlePart2="TES"
-        task={task}
-        setTask={setTask}
-        onPress={handleAddToStorage}
-        arrow
-        placeholder="Adicione uma nova tarefa"
-      />
-      <Title createNumber={tasks.length} doneNumber={handleDoneNumber()} />
-      <List
-        tasks={tasks}
-        onPress={(id: string) => handleDeleteItem(id)}
-        onDone={(item: Task) => handleUpateDoneTask(item)}
-      />
+      <>
+        <Header
+          titlePart1="NO"
+          titlePart2="TES"
+          task={task}
+          setTask={setTask}
+          onPress={handleAddToStorage}
+          arrow
+          placeholder="Adicione uma nova tarefa"
+          danger={danger}
+          setDanger={setDanger}
+        />
+        <Title createNumber={tasks.length} doneNumber={handleDoneNumber()} />
+        <List
+          tasks={tasks}
+          onPress={(id: string) => handleDeleteItem(id)}
+          onDone={(item: Task) => handleUpateDoneTask(item)}
+        />
+      </>
     </Container>
   );
 };

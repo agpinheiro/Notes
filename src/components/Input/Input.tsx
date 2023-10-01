@@ -9,37 +9,52 @@ import {
 import { theme } from '../../theme/theme';
 import { Icon } from '@rneui/themed';
 
+export interface DangerProps {
+  value: boolean;
+  message: string;
+}
+
 export interface InputProps {
   task: string;
   setTask: (text: string) => void | Dispatch<SetStateAction<string>>;
   onPress: () => void;
   placeholder: string;
+  danger: DangerProps;
+  setDanger: (
+    value: DangerProps,
+  ) => void | Dispatch<SetStateAction<DangerProps>>;
 }
 const Input: React.FC<InputProps> = ({
   task,
   setTask,
   onPress,
   placeholder,
+  danger,
+  setDanger,
 }) => {
-  const [danger, setDanger] = useState(false);
-  const [dangerLimit, setDangerLimit] = useState(false);
-
   const handleAddTask = () => {
     if (task.length < 1) {
-      setDanger(true);
+      setDanger({
+        value: true,
+        message: 'Esse campo não pode estar vazio!'
+      });
       return;
     }
     onPress();
   };
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setDanger(false);
-      setDangerLimit(false);
-    }, 4000);
+    if (danger) {
+      const timeout = setTimeout(() => {
+        setDanger({
+          value: false,
+          message: '',
+        });
+      }, 4000);
 
-    return () => clearTimeout(timeout);
-  }, [danger, dangerLimit]);
+      return () => clearTimeout(timeout);
+    }
+  }, [danger, setDanger]);
 
   return (
     <View style={styles.container}>
@@ -53,7 +68,10 @@ const Input: React.FC<InputProps> = ({
           <TextInput
             onChangeText={(text) => {
               if (text.length > 59) {
-                setDangerLimit(true);
+                setDanger({
+                  value: true,
+                  message: 'Quantidade maxima de caracteres atingida!',
+                });
                 return;
               }
               setTask(text);
@@ -78,16 +96,7 @@ const Input: React.FC<InputProps> = ({
           />
         </TouchableOpacity>
       </View>
-      {danger && (
-        <Text style={styles.containerDanger}>
-          Texto vazio não pode ser adicionado a lista!
-        </Text>
-      )}
-      {dangerLimit && (
-        <Text style={styles.containerDanger}>
-          Maximo de caracteres atingidos, 60!
-        </Text>
-      )}
+      {danger && <Text style={styles.containerDanger}>{danger.message}</Text>}
     </View>
   );
 };

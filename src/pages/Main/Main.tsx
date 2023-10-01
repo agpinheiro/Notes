@@ -15,13 +15,15 @@ import { theme } from '../../theme/theme';
 import Header from '../../components/Header/Header';
 import { deleteKey, getKeys, setStorage } from '../../services/storage';
 import { Icon } from '@rneui/themed';
-import Logo from '../../assets/logo.svg';
+import { DangerProps } from '../../components/Input/Input';
+import EmptyComponent from '../../components/EmptyComponent/EmptyComponent';
 
 type NavProps = RouteProps<'Main'>;
 
 const Main: React.FC<NavProps> = ({ navigation }) => {
   const [keys, setKeys] = useState<string[]>([]);
   const [key, setKey] = useState('');
+  const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const ItemSeparator = useCallback(() => {
     return <View style={{ height: 14 }} />;
   }, []);
@@ -45,6 +47,13 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
   }, []);
 
   const handleAddKeys = () => {
+    if (keys.some((k) => k === key)) {
+      return setDanger({
+        value: true,
+        message: 'Essa lista já existe!',
+      });
+    }
+
     setKey('');
     const data = [key, ...keys];
     setKeys(data);
@@ -75,21 +84,12 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
     );
   };
 
-  const EmptyComponent = useCallback(() => {
+  const EmptyList = useCallback(() => {
     return (
-      <View style={styles.containerEmpty}>
-        <Logo
-          style={{ opacity: 0.7 }}
-          width={theme.screnn.w * 0.2}
-          height={theme.screnn.w * 0.2}
-        />
-        <Text style={[styles.textEmpity, { fontWeight: '700' }]}>
-          Você ainda não tem listas cadastradas
-        </Text>
-        <Text style={[styles.textEmpity, { fontWeight: '300' }]}>
-          Agrupe suas tarefas de forma simples
-        </Text>
-      </View>
+      <EmptyComponent
+        title="Você ainda não tem listas cadastradas"
+        info="Agrupe suas tarefas de forma simples"
+      />
     );
   }, []);
 
@@ -106,6 +106,8 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
             handleAddKeys();
           }}
           placeholder="Adicione uma nova lista"
+          danger={danger}
+          setDanger={setDanger}
         />
         <View
           style={{
@@ -124,9 +126,9 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
         </View>
         <FlatList
           data={keys}
-          keyExtractor={(item) => item}
+          keyExtractor={(item, index) => index.toString()}
           style={{ marginTop: '8%' }}
-          ListEmptyComponent={EmptyComponent}
+          ListEmptyComponent={EmptyList}
           ItemSeparatorComponent={ItemSeparator}
           contentContainerStyle={{ paddingBottom: 60 }}
           renderItem={({ item, index }) => (

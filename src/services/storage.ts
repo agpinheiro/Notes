@@ -1,5 +1,5 @@
 import { MMKV } from 'react-native-mmkv';
-import { Task } from '../components/List/List';
+import { Task } from '../pages/NotesPage/components/List/List';
 
 export const storage = new MMKV({
   id: 'user-storage',

@@ -1,5 +1,5 @@
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import {
   NativeStackScreenProps,
   createNativeStackNavigator,
@@ -7,6 +7,7 @@ import {
 import NotesPage from '../pages/NotesPage/NotesPage';
 import Welcome from '../pages/Welcome/Welcome';
 import Main from '../pages/Main/Main';
+
 
 export type StackProps = {
   Welcome: undefined;
@@ -26,7 +27,8 @@ const Routes = () => {
         initialRouteName="Welcome"
         screenOptions={{
           headerShown: false,
-        }}>
+        }}
+      >
         <Stack.Screen name="Welcome" component={Welcome} />
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="Notes" component={NotesPage} />

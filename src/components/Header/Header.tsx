@@ -19,6 +19,8 @@ const Header: React.FC<Props> = ({
   titlePart2,
   arrow = true,
   placeholder,
+  danger,
+  setDanger,
 }) => {
   const navigation = useNavigation();
   return (
@@ -32,6 +34,8 @@ const Header: React.FC<Props> = ({
         task={task}
         setTask={setTask}
         onPress={onPress}
+        danger={danger}
+        setDanger={setDanger}
       />
       {arrow && (
         <TouchableOpacity

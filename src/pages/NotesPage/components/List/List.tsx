@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
 import {
   FlatList,
-  Image,
   ListRenderItem,
   Pressable,
   StyleSheet,
@@ -9,8 +8,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { theme } from '../../theme/theme';
+import { theme } from '../../../../theme/theme';
 import { Icon } from '@rneui/themed';
+import EmptyComponent from '../../../../components/EmptyComponent/EmptyComponent';
 
 export interface Task {
   id: string;
@@ -105,18 +105,10 @@ const List: React.FC<Props> = ({ tasks, onPress, onDone }) => {
   }, []);
   const EmptyItem = useCallback(() => {
     return (
-      <View style={styles.containerEmpty}>
-        <Image
-          style={styles.img}
-          source={require('../../assets/clipboard.png')}
-        />
-        <Text style={[styles.textEmpity, { fontWeight: '700' }]}>
-          Você ainda não tem tarefas cadastradas
-        </Text>
-        <Text style={[styles.textEmpity, { fontWeight: '300' }]}>
-          Crie tarefas e organize seus itens a fazer
-        </Text>
-      </View>
+      <EmptyComponent
+        title="Você ainda não tem tarefas cadastradas"
+        info="Crie tarefas e organize seus itens a fazer"
+      />
     );
   }, []);
   return (
