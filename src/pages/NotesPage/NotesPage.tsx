@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import Title from '../../components/Title/Title';
-import List, {Task} from '../../components/List/List';
+import List, { Task } from '../../components/List/List';
 import {
   deleteItemStorage,
   getStorage,
@@ -9,12 +9,16 @@ import {
 } from '../../services/storage';
 import Header from '../../components/Header/Header';
 import Container from '../../components/Cotainer/Container';
+import { RouteProps } from '../../routes/Routes';
 
-const NotesPage: React.FC = () => {
-  const key = 'Compras';
+type NavProps = RouteProps<'Note'>;
+
+const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
+  const key: string = route.params;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [task, setTask] = useState('');
   useEffect(() => {
+    if (!key || typeof key !== 'string') navigation.navigate('Main');
     const data = getStorage(key);
     setTasks(data);
     return () => {
@@ -41,7 +45,7 @@ const NotesPage: React.FC = () => {
   };
 
   const handleDoneNumber = (): number => {
-    return tasks.filter(item => item.done).length;
+    return tasks.filter((item) => item.done).length;
   };
 
   const handleUpateDoneTask = (item: Task) => {
@@ -50,7 +54,15 @@ const NotesPage: React.FC = () => {
   };
   return (
     <Container>
-      <Header task={task} setTask={setTask} onPress={handleAddToStorage} />
+      <Header
+        titlePart1="NO"
+        titlePart2="TES"
+        task={task}
+        setTask={setTask}
+        onPress={handleAddToStorage}
+        arrow
+        placeholder="Adicione uma nova tarefa"
+      />
       <Title createNumber={tasks.length} doneNumber={handleDoneNumber()} />
       <List
         tasks={tasks}

@@ -1,7 +1,7 @@
 import React from 'react';
-import {StatusBar} from 'react-native';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {theme} from './theme/theme';
+import { StatusBar } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { theme } from './theme/theme';
 import Routes from './routes/Routes';
 
 function App(): JSX.Element {

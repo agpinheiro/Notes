@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, { useCallback } from 'react';
 import {
   FlatList,
   Image,
@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {theme} from '../../theme/theme';
-import {Icon} from '@rneui/themed';
+import { theme } from '../../theme/theme';
+import { Icon } from '@rneui/themed';
 
 export interface Task {
   id: string;
@@ -32,8 +32,8 @@ interface ColorProps {
   decoration: 'line-through' | 'none';
 }
 
-const List: React.FC<Props> = ({tasks, onPress, onDone}) => {
-  const renderItem: ListRenderItem<Task> = ({item}) => {
+const List: React.FC<Props> = ({ tasks, onPress, onDone }) => {
+  const renderItem: ListRenderItem<Task> = ({ item }) => {
     const handleColor = () => {
       if (item.done) {
         const colors: ColorProps = {
@@ -61,8 +61,9 @@ const List: React.FC<Props> = ({tasks, onPress, onDone}) => {
           onPress={() => onDone(item)}
           style={[
             styles.check,
-            {backgroundColor: color.color, borderColor: color.border},
-          ]}>
+            { backgroundColor: color.color, borderColor: color.border },
+          ]}
+        >
           {color.icon && (
             <Icon
               name="check"
@@ -77,16 +78,21 @@ const List: React.FC<Props> = ({tasks, onPress, onDone}) => {
           numberOfLines={2}
           style={[
             styles.text,
-            {color: color.colorText, textDecorationLine: color.decoration},
-          ]}>
+            {
+              color: color.colorText,
+              textDecorationLine: color.decoration,
+              fontSize: item.task.length > 60 ? 15 : 16,
+            },
+          ]}
+        >
           {item.task}
         </Text>
         <Pressable onPress={() => onPress(item.id)}>
-          {({pressed}) => (
+          {({ pressed }) => (
             <Icon
               name="trash"
               type="font-awesome"
-              size={30}
+              size={28}
               color={pressed ? theme.colors.danger : theme.colors.white}
             />
           )}
@@ -95,7 +101,7 @@ const List: React.FC<Props> = ({tasks, onPress, onDone}) => {
     );
   };
   const ItemSeparator = useCallback(() => {
-    return <View style={{height: 14}} />;
+    return <View style={{ height: 14 }} />;
   }, []);
   const EmptyItem = useCallback(() => {
     return (
@@ -104,10 +110,10 @@ const List: React.FC<Props> = ({tasks, onPress, onDone}) => {
           style={styles.img}
           source={require('../../assets/clipboard.png')}
         />
-        <Text style={[styles.textEmpity, {fontWeight: '700'}]}>
+        <Text style={[styles.textEmpity, { fontWeight: '700' }]}>
           Você ainda não tem tarefas cadastradas
         </Text>
-        <Text style={[styles.textEmpity, {fontWeight: '300'}]}>
+        <Text style={[styles.textEmpity, { fontWeight: '300' }]}>
           Crie tarefas e organize seus itens a fazer
         </Text>
       </View>
@@ -117,11 +123,11 @@ const List: React.FC<Props> = ({tasks, onPress, onDone}) => {
     <View style={styles.container}>
       <FlatList
         data={tasks}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        style={{width: '100%'}}
+        style={{ width: '100%' }}
         ListEmptyComponent={EmptyItem}
-        contentContainerStyle={{paddingBottom: 60}}
+        contentContainerStyle={{ paddingBottom: 60 }}
         ItemSeparatorComponent={ItemSeparator}
       />
     </View>
@@ -148,7 +154,6 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.white,
   },
   text: {
-    fontSize: 16,
     width: '78%',
     textAlign: 'left',
   },

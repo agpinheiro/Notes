@@ -1,4 +1,4 @@
-import React, {Dispatch, SetStateAction, useEffect, useState} from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,16 +6,23 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {theme} from '../../theme/theme';
-import {Icon} from '@rneui/themed';
+import { theme } from '../../theme/theme';
+import { Icon } from '@rneui/themed';
 
 export interface InputProps {
   task: string;
   setTask: (text: string) => void | Dispatch<SetStateAction<string>>;
   onPress: () => void;
+  placeholder: string;
 }
-const Input: React.FC<InputProps> = ({task, setTask, onPress}) => {
+const Input: React.FC<InputProps> = ({
+  task,
+  setTask,
+  onPress,
+  placeholder,
+}) => {
   const [danger, setDanger] = useState(false);
+  const [dangerLimit, setDangerLimit] = useState(false);
 
   const handleAddTask = () => {
     if (task.length < 1) {
@@ -28,10 +35,11 @@ const Input: React.FC<InputProps> = ({task, setTask, onPress}) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setDanger(false);
+      setDangerLimit(false);
     }, 4000);
 
     return () => clearTimeout(timeout);
-  }, [danger]);
+  }, [danger, dangerLimit]);
 
   return (
     <View style={styles.container}>
@@ -40,19 +48,28 @@ const Input: React.FC<InputProps> = ({task, setTask, onPress}) => {
           style={[
             styles.containerInput,
             task.length > 0 ? styles.borderInput : null,
-          ]}>
+          ]}
+        >
           <TextInput
-            onChangeText={setTask}
+            onChangeText={(text) => {
+              if (text.length > 59) {
+                setDangerLimit(true);
+                return;
+              }
+              setTask(text);
+            }}
+            maxLength={60}
             value={task}
             placeholderTextColor={theme.colors.gray300}
-            placeholder="Adicione uma nova tarefa"
+            placeholder={placeholder}
             style={styles.input}
           />
         </View>
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={handleAddTask}
-          style={styles.button}>
+          style={styles.button}
+        >
           <Icon
             name="pluscircleo"
             type="antdesign"
@@ -64,6 +81,11 @@ const Input: React.FC<InputProps> = ({task, setTask, onPress}) => {
       {danger && (
         <Text style={styles.containerDanger}>
           Texto vazio não pode ser adicionado a lista!
+        </Text>
+      )}
+      {dangerLimit && (
+        <Text style={styles.containerDanger}>
+          Maximo de caracteres atingidos, 60!
         </Text>
       )}
     </View>
@@ -110,5 +132,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: theme.screnn.h * 0.06,
     height: theme.screnn.h * 0.06,
-  }
+  },
 });
