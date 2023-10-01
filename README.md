@@ -1,4 +1,47 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Project: **Notes**
+
+This is the repository for the Notes project, a React Native application created to help users efficiently organize and manage their notes. The application was developed using the following libraries and dependencies:
+
+# Project Images
+
+1. **Welcome Screen:**
+   ![Welcome](https://drive.google.com/file/d/1ICD-f8QowpH9NeHD5z1VDcm_EIv4zZLr/view?usp=sharing)
+
+2. **Main Screen:**
+   ![Main](https://drive.google.com/file/d/17IikmScDZOrAEjexLWKoBtEa_meqEmr7/view?usp=sharing)
+
+3. **Notes Screen:**
+   ![Notes](https://drive.google.com/file/d/1YPnLMaYhmR1Jc9PiCh3FJb0oV5oYisOk/view?usp=sharing)
+
+# Used Libraries
+
+**React Native:** The mobile app development framework that allows you to create native apps for Android and iOS using JavaScript and React.
+- Version: 0.72.5
+
+
+React Navigation: A navigation library for React Native that makes it easy to create intuitive and customizable navigation systems.
+- @react-navigation/native: Version 6.1.8
+- @react-navigation/native-stack: Version 6.9.14
+
+**React Native Elements UI:** A UI library that provides ready-to-use components such as buttons, icons, and lists.
+- @rneui/base: Version 4.0.0-rc.8
+- @rneui/themed: Version 4.0.0-rc.8
+
+**Lottie React Native:** A library that allows integration of vector animations in Lottie format into React Native apps.
+- Version: 6.3.1
+
+**React Native MMKV:** A library for efficient data storage in React Native apps.
+- Version: 2.10.2
+
+**React Native Safe Area Context:** A library that provides information about safe areas on devices with notches.
+- Version: 4.7.2
+
+
+**React Native SVG:** A library for rendering SVG in React Native apps.
+- Version: 13.14.0
+
+**React Native Vector Icons:** A library that provides customizable vector icons for React Native apps.
+- Version: 10.0.0
 
 # Getting Started
 
