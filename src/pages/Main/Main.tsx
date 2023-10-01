@@ -15,6 +15,7 @@ import { theme } from '../../theme/theme';
 import Header from '../../components/Header/Header';
 import { deleteKey, getKeys, setStorage } from '../../services/storage';
 import { Icon } from '@rneui/themed';
+import Logo from '../../assets/logo.svg';
 
 type NavProps = RouteProps<'Main'>;
 
@@ -75,6 +76,24 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
     );
   };
 
+  const EmptyComponent = useCallback(() => {
+    return (
+      <View style={styles.containerEmpty}>
+        <Logo
+          style={{ opacity: 0.7 }}
+          width={theme.screnn.w * 0.2}
+          height={theme.screnn.w * 0.2}
+        />
+        <Text style={[styles.textEmpity, { fontWeight: '700' }]}>
+          Você ainda não tem listas cadastradas
+        </Text>
+        <Text style={[styles.textEmpity, { fontWeight: '300' }]}>
+          Agrupe suas tarefas de forma simples
+        </Text>
+      </View>
+    );
+  }, []);
+
   return (
     <Container>
       <View style={styles.container}>
@@ -108,6 +127,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
           data={keys}
           keyExtractor={(item) => item}
           style={{ marginTop: '8%' }}
+          ListEmptyComponent={EmptyComponent}
           ItemSeparatorComponent={ItemSeparator}
           contentContainerStyle={{ paddingBottom: 60 }}
           renderItem={({ item, index }) => (
@@ -190,6 +210,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '900',
     color: theme.colors.blue,
+  },
+  containerEmpty: {
+    alignItems: 'center',
+    marginTop: '10%',
+  },
+  textEmpity: {
+    color: theme.colors.gray300,
+    fontSize: 18,
   },
 });
 

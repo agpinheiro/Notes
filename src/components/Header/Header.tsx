@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: theme.colors.white,
-    fontSize: 50,
+    fontSize: 70,
     fontWeight: '900',
   },
   textBlue: {
