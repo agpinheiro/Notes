@@ -28,7 +28,6 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
 
   useEffect(() => {
     const data = getKeys('keys');
-    console.log(data);
     setKeys(data);
   }, []);
 
@@ -213,7 +212,7 @@ const styles = StyleSheet.create({
   },
   containerEmpty: {
     alignItems: 'center',
-    marginTop: '10%',
+    marginTop: '14%',
   },
   textEmpity: {
     color: theme.colors.gray300,
