@@ -47,7 +47,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
   }, []);
 
   const handleAddKeys = () => {
-    if (keys.some((k) => k === key)) {
+    if (keys.some((k) => k === key.toUpperCase().trim())) {
       return setDanger({
         value: true,
         message: 'Essa lista já existe!',
@@ -55,7 +55,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
     }
 
     setKey('');
-    const data = [key, ...keys];
+    const data = [key.toUpperCase().trim(), ...keys];
     setKeys(data);
     setStorage('keys', data);
   };
