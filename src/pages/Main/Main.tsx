@@ -84,14 +84,14 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
     );
   };
 
-  const EmptyList = useCallback(() => {
+  const emptyList = () => {
     return (
       <EmptyComponent
         title="Você ainda não tem listas cadastradas"
         info="Agrupe suas tarefas de forma simples"
       />
     );
-  }, []);
+  };
 
   return (
     <Container>
@@ -128,7 +128,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
           data={keys}
           keyExtractor={(item, index) => index.toString()}
           style={{ marginTop: '8%' }}
-          ListEmptyComponent={EmptyList}
+          ListEmptyComponent={emptyList}
           ItemSeparatorComponent={ItemSeparator}
           contentContainerStyle={{ paddingBottom: 60 }}
           renderItem={({ item, index }) => (
@@ -142,7 +142,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
                       : theme.colors.blue_dark,
                 },
               ]}
-              onPress={() => navigation.navigate('Notes', item)}
+              onPress={() => navigation.navigate('Notes', { item: item })}
             >
               <Text numberOfLines={1} style={styles.textButtons}>
                 {item}

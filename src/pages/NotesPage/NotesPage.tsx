@@ -16,7 +16,7 @@ import { BackHandler } from 'react-native';
 type NavProps = RouteProps<'Notes'>;
 
 const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
-  const key: string = route.params || '';
+  const key: string = route.params?.item || '';
   const [tasks, setTasks] = useState<Task[]>([]);
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const [task, setTask] = useState('');
@@ -72,6 +72,28 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     const data: Task[] = updateStorageTask(key, item, tasks);
     setTasks(data);
   };
+
+  const handleReindex = (item: Task, index: number) => {
+    const currentIndex = tasks.findIndex((t) => t.id === item.id);
+    if (
+      (currentIndex <= 0 && index === 1) ||
+      (currentIndex >= tasks.length - 1 && index === -1)
+    ) {
+      return;
+    }
+    setTasks((prevTasks) => {
+      const newTasks = [...prevTasks];
+
+      const removedItem = newTasks.splice(currentIndex, 1)[0];
+
+      newTasks.splice(currentIndex - index, 0, removedItem);
+
+      setStorage(key, newTasks);
+
+      return newTasks;
+    });
+  };
+
   return (
     <Container>
       <>
@@ -91,6 +113,11 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           tasks={tasks}
           onPress={(id: string) => handleDeleteItem(id)}
           onDone={(item: Task) => handleUpateDoneTask(item)}
+          onEdit={(item: Task) => {
+            setTask(item.task);
+            handleDeleteItem(item.id);
+          }}
+          onReIndex={(item: Task, value: number) => handleReindex(item, value)}
         />
       </>
     </Container>

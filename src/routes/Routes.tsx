@@ -8,11 +8,10 @@ import NotesPage from '../pages/NotesPage/NotesPage';
 import Welcome from '../pages/Welcome/Welcome';
 import Main from '../pages/Main/Main';
 
-
 export type StackProps = {
   Welcome: undefined;
   Main: undefined;
-  Notes: undefined;
+  Notes: { item: string } | undefined;
 };
 
 export type RouteProps<RouteName extends keyof StackProps> =
