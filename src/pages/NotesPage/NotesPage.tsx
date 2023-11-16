@@ -12,6 +12,7 @@ import Container from '../../components/Cotainer/Container';
 import { RouteProps } from '../../routes/Routes';
 import { DangerProps } from '../../components/Input/Input';
 import { BackHandler } from 'react-native';
+import { generateUUID } from '../../utils/generateId';
 
 type NavProps = RouteProps<'Notes'>;
 
@@ -49,7 +50,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
 
   const handleAddToStorage = () => {
     const newTask: Task = {
-      id: tasks.length.toString(),
+      id: generateUUID(),
       task,
       done: false,
     };
