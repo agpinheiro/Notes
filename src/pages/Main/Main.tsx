@@ -17,12 +17,16 @@ import { deleteKey, getKeys, setStorage } from '../../services/storage';
 import { Icon } from '@rneui/themed';
 import { DangerProps } from '../../components/Input/Input';
 import EmptyComponent from '../../components/EmptyComponent/EmptyComponent';
+import { NewTask } from '../NotesPage/NotesPage';
 
 type NavProps = RouteProps<'Main'>;
 
 const Main: React.FC<NavProps> = ({ navigation }) => {
   const [keys, setKeys] = useState<string[]>([]);
-  const [key, setKey] = useState('');
+  const [key, setKey] = useState<NewTask>({
+    task: '',
+    priority: 'Baixa',
+  } as NewTask);
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const ItemSeparator = useCallback(() => {
     return <View style={{ height: 14 }} />;
@@ -47,15 +51,19 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
   }, []);
 
   const handleAddKeys = () => {
-    if (keys.some((k) => k === key.toUpperCase().trim())) {
+    if (
+      keys.some(
+        (k) =>
+          k.toLocaleLowerCase().trim() === key.task.toLocaleLowerCase().trim(),
+      )
+    ) {
       return setDanger({
         value: true,
         message: 'Essa lista já existe!',
       });
     }
 
-    setKey('');
-    const data = [key.toUpperCase().trim(), ...keys];
+    const data = [key.task.trim(), ...keys];
     setKeys(data);
     setStorage('keys', data);
   };
@@ -100,10 +108,14 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
           titlePart1="NO"
           titlePart2="TES"
           arrow={false}
-          task={key}
-          setTask={setKey}
+          task={key.task}
+          setTask={(value) => setKey(value)}
           onPress={() => {
             handleAddKeys();
+            setKey({
+              task: '',
+              priority: 'Baixa',
+            } as NewTask);
           }}
           placeholder="Adicione uma nova lista"
           danger={danger}

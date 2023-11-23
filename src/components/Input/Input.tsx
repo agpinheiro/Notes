@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { theme } from '../../theme/theme';
 import { Icon } from '@rneui/themed';
+import { NewTask } from '../../pages/NotesPage/NotesPage';
+import { Priority } from '../Header/Header';
 
 export interface DangerProps {
   value: boolean;
@@ -16,13 +18,14 @@ export interface DangerProps {
 
 export interface InputProps {
   task: string;
-  setTask: (text: string) => void | Dispatch<SetStateAction<string>>;
+  setTask: (value: NewTask) => void | Dispatch<SetStateAction<NewTask>>;
   onPress: () => void;
   placeholder: string;
   danger: DangerProps;
   setDanger: (
     value: DangerProps,
   ) => void | Dispatch<SetStateAction<DangerProps>>;
+  priority?: Priority;
 }
 const Input: React.FC<InputProps> = ({
   task,
@@ -31,12 +34,13 @@ const Input: React.FC<InputProps> = ({
   placeholder,
   danger,
   setDanger,
+  priority = 'Baixa',
 }) => {
   const handleAddTask = () => {
     if (task.length < 1) {
       setDanger({
         value: true,
-        message: 'Esse campo não pode estar vazio!'
+        message: 'Esse campo não pode estar vazio!',
       });
       return;
     }
@@ -74,7 +78,7 @@ const Input: React.FC<InputProps> = ({
                 });
                 return;
               }
-              setTask(text);
+              setTask({ task: text, priority: priority });
             }}
             maxLength={60}
             value={task}
@@ -85,7 +89,9 @@ const Input: React.FC<InputProps> = ({
         </View>
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={handleAddTask}
+          onPress={() => {
+            handleAddTask();
+          }}
           style={styles.button}
         >
           <Icon

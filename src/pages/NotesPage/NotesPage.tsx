@@ -7,30 +7,47 @@ import {
   setStorage,
   updateStorageTask,
 } from '../../services/storage';
-import Header from '../../components/Header/Header';
+import Header, { Priority } from '../../components/Header/Header';
 import Container from '../../components/Cotainer/Container';
 import { RouteProps } from '../../routes/Routes';
 import { DangerProps } from '../../components/Input/Input';
 import { BackHandler } from 'react-native';
 import { generateUUID } from '../../utils/generateId';
+import ButtonFilter from '../../components/Filter/ButtonFilter';
+import Filter from '../../components/Filter/Filter';
 
 type NavProps = RouteProps<'Notes'>;
+
+export type NewTask = { task: string; priority: Priority };
 
 const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const key: string = route.params?.item || '';
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
-  const [task, setTask] = useState('');
+
+  const [prioritySelected, setPrioritySelected] = useState<Priority>('Baixa');
+  const [task, setTask] = useState<NewTask>({
+    task: '',
+    priority: prioritySelected,
+  } as NewTask);
+  const [activeFilter, setActiveFilter] = useState(false);
   useEffect(() => {
     if (key === '') {
       navigation.navigate('Main');
     }
     const data = getStorage(key);
     setTasks(data);
+    setFilteredTasks(data);
 
     return () => {
       setTasks([]);
-      setTask('');
+      setFilteredTasks([]);
+
+      setTask({
+        task: '',
+        priority: prioritySelected,
+      } as NewTask);
     };
   }, []);
 
@@ -51,18 +68,26 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const handleAddToStorage = () => {
     const newTask: Task = {
       id: generateUUID(),
-      task,
+      task: task.task,
+      priority: prioritySelected,
       done: false,
     };
     const data = [newTask, ...tasks];
     setTasks(data);
-    setTask('');
+    setFilteredTasks(data);
+
+    setTask({
+      task: '',
+      priority: prioritySelected,
+    } as NewTask);
+
     setStorage(key, data);
   };
 
   const handleDeleteItem = (id: string) => {
     const data = deleteItemStorage(key, id);
     setTasks(data);
+    setFilteredTasks(data);
   };
 
   const handleDoneNumber = (): number => {
@@ -72,6 +97,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const handleUpateDoneTask = (item: Task) => {
     const data: Task[] = updateStorageTask(key, item, tasks);
     setTasks(data);
+    setFilteredTasks(data);
   };
 
   const handleReindex = (item: Task, index: number) => {
@@ -90,9 +116,18 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       newTasks.splice(currentIndex - index, 0, removedItem);
 
       setStorage(key, newTasks);
-
+      setFilteredTasks(newTasks);
       return newTasks;
     });
+  };
+
+  const handleFilter = (option: Priority | '') => {
+    if (!option) {
+      setFilteredTasks(tasks);
+      return;
+    }
+    const filtered = tasks.filter((item) => item.priority === option);
+    setFilteredTasks(filtered);
   };
 
   return (
@@ -101,24 +136,43 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
         <Header
           titlePart1="NO"
           titlePart2="TES"
-          task={task}
+          task={task.task}
           setTask={setTask}
           onPress={handleAddToStorage}
           arrow
           placeholder="Adicione uma nova tarefa"
           danger={danger}
           setDanger={setDanger}
+          priorityControl
+          setPrioritySelected={setPrioritySelected}
+          prioritySelected={prioritySelected}
         />
         <Title createNumber={tasks.length} doneNumber={handleDoneNumber()} />
+        <ButtonFilter
+          setActiveFilter={setActiveFilter}
+          activeFilter={activeFilter}
+        />
+        {activeFilter && (
+          <Filter
+            onPress={(value: Priority | '') => {
+              handleFilter(value);
+              setActiveFilter(!activeFilter);
+            }}
+          />
+        )}
         <List
-          tasks={tasks}
+          tasks={filteredTasks}
           onPress={(id: string) => handleDeleteItem(id)}
           onDone={(item: Task) => handleUpateDoneTask(item)}
           onEdit={(item: Task) => {
-            setTask(item.task);
+            setTask({
+              task: item.task,
+              priority: item.priority ? item.priority : prioritySelected,
+            });
             handleDeleteItem(item.id);
           }}
           onReIndex={(item: Task, value: number) => handleReindex(item, value)}
+          open={filteredTasks !== tasks}
         />
       </>
     </Container>

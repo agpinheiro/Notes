@@ -1,16 +1,17 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import {theme} from '../../theme/theme';
+import { StyleSheet, Text, View } from 'react-native';
+import { theme } from '../../theme/theme';
+import { Priority } from '../Header/Header';
 
 interface RowProps {
   name: string;
   number: string | number;
   color: string;
 }
-const Row = ({name, number, color}: RowProps) => {
+const Row = ({ name, number, color }: RowProps) => {
   return (
     <View style={styles.row}>
-      <Text style={[styles.textRow, {color}]}>{name}</Text>
+      <Text style={[styles.textRow, { color }]}>{name}</Text>
       <Text style={styles.numberRow}>{number}</Text>
     </View>
   );
@@ -19,17 +20,14 @@ const Row = ({name, number, color}: RowProps) => {
 interface TitleProps {
   createNumber: number;
   doneNumber: number;
+  filter?: Priority;
 }
 
-const Title: React.FC<TitleProps> = ({createNumber, doneNumber}) => {
+const Title: React.FC<TitleProps> = ({ createNumber, doneNumber }) => {
   return (
     <View style={styles.container}>
-      <Row color={theme.colors.blue} name="Criadas" number={createNumber} />
-      <Row
-        color={theme.colors.purple_dark}
-        name="Concluídas"
-        number={doneNumber}
-      />
+      <Row color={theme.colors.white} name="Criadas" number={createNumber} />
+      <Row color={theme.colors.white} name="Concluídas" number={doneNumber} />
     </View>
   );
 };
@@ -40,7 +38,7 @@ const styles = StyleSheet.create({
   container: {
     borderBottomWidth: 1,
     borderColor: theme.colors.gray200,
-    marginTop: '10%',
+    marginTop: '16%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginHorizontal: 20,
@@ -52,7 +50,7 @@ const styles = StyleSheet.create({
   },
   textRow: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '600',
   },
   numberRow: {
     backgroundColor: theme.colors.gray,

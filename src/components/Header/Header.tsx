@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Input, { InputProps } from '../Input/Input';
 import { theme } from '../../theme/theme';
 import { Icon } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
+import CheckboxComponent from '../CheckboxComponent/CheckboxComponent';
 
 interface Props extends InputProps {
   titlePart1: string;
   titlePart2: string;
   arrow?: boolean;
+  priorityControl?: boolean;
+  setPrioritySelected?: (
+    value: Priority,
+  ) => void | Dispatch<SetStateAction<Priority>>;
+  prioritySelected?: Priority;
 }
+
+export type Priority = 'Baixa' | 'Media' | 'Alta';
 
 const Header: React.FC<Props> = ({
   task,
@@ -21,22 +29,12 @@ const Header: React.FC<Props> = ({
   placeholder,
   danger,
   setDanger,
+  setPrioritySelected,
+  prioritySelected = 'Baixa',
 }) => {
   const navigation = useNavigation();
   return (
     <View style={styles.container}>
-      <View style={styles.row}>
-        <Text style={[styles.text, styles.textBlue]}>{titlePart1}</Text>
-        <Text style={[styles.text, styles.textPurple]}>{titlePart2}</Text>
-      </View>
-      <Input
-        placeholder={placeholder}
-        task={task}
-        setTask={setTask}
-        onPress={onPress}
-        danger={danger}
-        setDanger={setDanger}
-      />
       {arrow && (
         <TouchableOpacity
           onPress={() => navigation.navigate('Main')}
@@ -49,6 +47,73 @@ const Header: React.FC<Props> = ({
             color={theme.colors.white}
           />
         </TouchableOpacity>
+      )}
+      <View style={styles.row}>
+        <Text style={[styles.text, styles.textBlue]}>{titlePart1}</Text>
+        <Text style={[styles.text, styles.textPurple]}>{titlePart2}</Text>
+      </View>
+      <Input
+        placeholder={placeholder}
+        task={task}
+        setTask={setTask}
+        onPress={onPress}
+        danger={danger}
+        setDanger={setDanger}
+        priority={prioritySelected}
+      />
+
+      {setPrioritySelected && (
+        <View
+          style={{
+            paddingHorizontal: 40,
+            width: '100%',
+            position: 'absolute',
+            height: theme.screnn.h * 0.06,
+            bottom: (-theme.screnn.h * 0.18) / 2,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}
+        >
+          <CheckboxComponent
+            colors={{
+              name: theme.colors.blue,
+              selected: theme.colors.blue,
+              unselected: theme.colors.white,
+            }}
+            name="Baixa"
+            value={prioritySelected === 'Baixa'}
+            onPress={() => {
+              setPrioritySelected('Baixa');
+              setTask({ task, priority: prioritySelected });
+            }}
+          />
+          <CheckboxComponent
+            colors={{
+              name: theme.colors.purple_dark,
+              selected: theme.colors.purple_dark,
+              unselected: theme.colors.white,
+            }}
+            name="Média"
+            value={prioritySelected === 'Media'}
+            onPress={() => {
+              setPrioritySelected('Media');
+              setTask({ task, priority: prioritySelected });
+            }}
+          />
+          <CheckboxComponent
+            colors={{
+              name: theme.colors.danger,
+              selected: theme.colors.danger,
+              unselected: theme.colors.white,
+            }}
+            name="Alta"
+            value={prioritySelected === 'Alta'}
+            onPress={() => {
+              setPrioritySelected('Alta');
+              setTask({ task, priority: prioritySelected });
+            }}
+          />
+        </View>
       )}
     </View>
   );

@@ -2,11 +2,13 @@ import React, { useCallback } from 'react';
 import { FlatList, ListRenderItem, View } from 'react-native';
 import EmptyComponent from '../../../../components/EmptyComponent/EmptyComponent';
 import Item from '../../../../components/Item/Item';
+import { Priority } from '../../../../components/Header/Header';
 
 export interface Task {
   id: string;
   task: string;
   done: boolean;
+  priority?: Priority;
 }
 
 interface Props {
@@ -15,6 +17,7 @@ interface Props {
   onDone: (item: Task) => void;
   onEdit: (item: Task) => void;
   onReIndex: (item: Task, value: number) => void;
+  open: boolean;
 }
 
 const List: React.FC<Props> = ({
@@ -23,6 +26,7 @@ const List: React.FC<Props> = ({
   onDone,
   onEdit,
   onReIndex,
+  open,
 }) => {
   const renderItem: ListRenderItem<Task> = ({ item, index }) => {
     return (
@@ -32,6 +36,7 @@ const List: React.FC<Props> = ({
         onPress={() => onPress(item.id)}
         onEdit={() => onEdit(item)}
         onReIndex={(value: number) => onReIndex(item, value)}
+        open={open}
       />
     );
   };
@@ -53,7 +58,7 @@ const List: React.FC<Props> = ({
     <View
       style={{
         flex: 1,
-        marginTop: '8%',
+        marginTop: '3%',
         alignItems: 'center',
         marginHorizontal: 20,
       }}

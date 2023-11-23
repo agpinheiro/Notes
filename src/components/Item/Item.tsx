@@ -11,6 +11,7 @@ interface Props {
   onPress: () => void;
   onEdit: () => void;
   onReIndex: (value: number) => void;
+  open: boolean;
 }
 
 interface ColorProps {
@@ -19,6 +20,7 @@ interface ColorProps {
   icon: boolean;
   colorText: string;
   decoration: 'line-through' | 'none';
+  borderItem: string;
 }
 
 const Item: React.FC<Props> = ({
@@ -27,7 +29,18 @@ const Item: React.FC<Props> = ({
   onPress,
   onEdit,
   onReIndex,
+  open,
 }) => {
+  const handleColorBoder = () => {
+    if (item.priority === 'Alta') {
+      return theme.colors.danger;
+    }
+    if (item.priority === 'Media') {
+      return theme.colors.purple_dark;
+    }
+    return theme.colors.blue;
+  };
+
   const handleColor = () => {
     if (item.done) {
       const colors: ColorProps = {
@@ -36,6 +49,7 @@ const Item: React.FC<Props> = ({
         icon: true,
         colorText: theme.colors.gray200,
         decoration: 'line-through',
+        borderItem: handleColorBoder(),
       };
       return colors;
     }
@@ -45,12 +59,16 @@ const Item: React.FC<Props> = ({
       icon: false,
       colorText: theme.colors.white,
       decoration: 'none',
+      borderItem: handleColorBoder(),
     };
     return colors;
   };
   const color: ColorProps = handleColor();
   return (
-    <SwipleBase onPress={(value: number) => onReIndex(value)}>
+    <SwipleBase
+      width={open ? 0 : 0.2}
+      onPress={(value: number) => onReIndex(value)}
+    >
       <TouchableOpacity
         onLongPress={onEdit}
         style={{
@@ -62,8 +80,8 @@ const Item: React.FC<Props> = ({
           justifyContent: 'space-between',
           paddingHorizontal: 10,
           borderRadius: 10,
-          borderWidth: 0.3,
-          borderColor: theme.colors.white,
+          borderWidth: 1,
+          borderColor: color.borderItem,
         }}
       >
         <TouchableOpacity

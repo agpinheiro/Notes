@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { theme } from '../../theme/theme';
@@ -7,16 +7,18 @@ import { Icon } from '@rneui/themed';
 interface Props {
   children: ReactNode;
   onPress: (value: number) => void;
+  width: number;
 }
 
-const SwipleBase: React.FC<Props> = ({ children, onPress }) => {
+const SwipleBase: React.FC<Props> = ({ children, onPress, width = 0.2 }) => {
   const renderRight = () => {
     return (
       <View
         style={[
           styles.right,
           {
-            width: theme.screnn.w * 0.2,
+            display: !width ? 'none' : 'flex',
+            width: theme.screnn.w * width,
           },
         ]}
       >
