@@ -1,8 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { FlatList, ListRenderItem, View } from 'react-native';
 import EmptyComponent from '../../../../components/EmptyComponent/EmptyComponent';
 import Item from '../../../../components/Item/Item';
 import { Priority } from '../../../../components/Header/Header';
+import { theme } from '../../../../theme/theme';
 
 export interface Task {
   id: string;
@@ -28,14 +29,17 @@ const List: React.FC<Props> = ({
   onReIndex,
   open,
 }) => {
-  const renderItem: ListRenderItem<Task> = ({ item, index }) => {
+  const renderItem: ListRenderItem<Task> = ({ item }) => {
     return (
       <Item
         item={item}
         onDone={() => onDone(item)}
         onPress={() => onPress(item.id)}
         onEdit={() => onEdit(item)}
-        onReIndex={(value: number) => onReIndex(item, value)}
+        onReIndex={(value: number) => {
+          onReIndex(item, value);
+          scrollToOffset(theme.screnn.h * -0.1 * value);
+        }}
         open={open}
       />
     );
@@ -54,6 +58,12 @@ const List: React.FC<Props> = ({
     );
   }, []);
 
+  const flatlistRef: React.LegacyRef<FlatList<Task>> = useRef(null);
+
+  const scrollToOffset = (offset: number) => {
+    flatlistRef.current.scrollToOffset({ animated: true, offset });
+  };
+
   return (
     <View
       style={{
@@ -65,6 +75,7 @@ const List: React.FC<Props> = ({
     >
       <FlatList
         data={tasks}
+        ref={flatlistRef}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         style={{ width: '100%' }}

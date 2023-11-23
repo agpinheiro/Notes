@@ -17,49 +17,70 @@ const SwipleBase: React.FC<Props> = ({ children, onPress, width = 0.2 }) => {
         style={[
           styles.right,
           {
-            display: !width ? 'none' : 'flex',
             width: theme.screnn.w * width,
           },
         ]}
       >
         <TouchableOpacity
-          onPress={() => onPress(1)}
           style={{
-            alignItems: 'center',
-            paddingLeft: 10,
+            backgroundColor: theme.colors.purple_dark,
+            width: width === 0.2 ? '100%' : '50%',
+            height: '100%',
             justifyContent: 'center',
-            width: '100%',
-            height: '50%',
-            backgroundColor: theme.colors.blue,
-            borderTopRightRadius: 8,
+            alignItems: 'center',
+            borderBottomRightRadius: width === 0.2 ? 8 : 0,
+            borderTopRightRadius: width === 0.2 ? 8 : 0,
           }}
         >
           <Icon
-            name="arrow-bold-up"
-            type="entypo"
-            size={30}
+            name="clock-time-eight-outline"
+            type="material-community"
             color={theme.colors.white}
+            size={theme.screnn.w * 0.1}
           />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => onPress(-1)}
-          style={{
-            alignItems: 'center',
-            paddingLeft: 10,
-            justifyContent: 'center',
-            width: '100%',
-            height: '50%',
-            backgroundColor: theme.colors.purple,
-            borderBottomRightRadius: 8,
-          }}
-        >
-          <Icon
-            name="arrow-bold-down"
-            type="entypo"
-            size={30}
-            color={theme.colors.white}
-          />
-        </TouchableOpacity>
+        {width === 0.4 && (
+          <View style={{ width: '50%', height: '100%' }}>
+            <TouchableOpacity
+              onPress={() => onPress(1)}
+              style={{
+                alignItems: 'center',
+                paddingLeft: 10,
+                justifyContent: 'center',
+                width: '100%',
+                height: '50%',
+                backgroundColor: theme.colors.blue,
+                borderTopRightRadius: 8,
+              }}
+            >
+              <Icon
+                name="arrow-bold-up"
+                type="entypo"
+                size={30}
+                color={theme.colors.white}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => onPress(-1)}
+              style={{
+                alignItems: 'center',
+                paddingLeft: 10,
+                justifyContent: 'center',
+                width: '100%',
+                height: '50%',
+                backgroundColor: theme.colors.purple,
+                borderBottomRightRadius: 8,
+              }}
+            >
+              <Icon
+                name="arrow-bold-down"
+                type="entypo"
+                size={30}
+                color={theme.colors.white}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     );
   };
@@ -82,6 +103,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
+    flexDirection: 'row',
     borderTopRightRadius: 10,
     borderBottomRightRadius: 10,
     marginLeft: -theme.screnn.w * 0.04,

@@ -66,7 +66,7 @@ const Item: React.FC<Props> = ({
   const color: ColorProps = handleColor();
   return (
     <SwipleBase
-      width={open ? 0 : 0.2}
+      width={open ? 0.2 : 0.4}
       onPress={(value: number) => onReIndex(value)}
     >
       <TouchableOpacity
