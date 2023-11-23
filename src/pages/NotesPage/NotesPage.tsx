@@ -233,7 +233,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           cancelText="Cancelar"
           onConfirm={(newDate) => {
             setOpenDate(false);
-            if (selectedItem) {
+            if (selectedItem && newDate > new Date()) {
               if (!selectedItem.done) {
                 pushLocalSchedule({
                   item: selectedItem,
