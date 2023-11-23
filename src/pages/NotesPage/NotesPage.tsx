@@ -5,6 +5,7 @@ import {
   deleteItemStorage,
   getStorage,
   setStorage,
+  updateStorageScheduleTask,
   updateStorageTask,
 } from '../../services/storage';
 import Header, { Priority } from '../../components/Header/Header';
@@ -38,8 +39,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     priority: prioritySelected,
   } as NewTask);
   const [activeFilter, setActiveFilter] = useState(false);
-  const [date, setDate] = useState(new Date());
-  const [open, setOpen] = useState(false);
+  const [openDate, setOpenDate] = useState(false);
   const [selectedItem, setItem] = useState<Task>();
 
   useEffect(() => {
@@ -123,7 +123,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
 
   const handleUpateDateTask = (item: Task, date: Date) => {
     item.date = date;
-    const data: Task[] = updateStorageTask(key, item, tasks);
+    const data: Task[] = updateStorageScheduleTask(key, item, tasks);
     setTasks(data);
     setFilteredTasks(data);
   };
@@ -203,15 +203,15 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           open={filteredTasks !== tasks}
           onDate={(item: Task) => {
             requestPushNotificationPermission();
-            setOpen(true);
+            setOpenDate(true);
             setItem(item);
           }}
         />
 
         <DatePicker
           modal
-          open={open}
-          date={date}
+          open={openDate}
+          date={new Date()}
           locale="pt-BR"
           mode="datetime"
           title="Escolha uma data"
@@ -219,16 +219,19 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           confirmText="Salvar"
           cancelText="Cancelar"
           onConfirm={(newDate) => {
-            setOpen(false);
+            setOpenDate(false);
             if (selectedItem) {
               if (!selectedItem.done) {
-                pushLocalSchedule({ message: selectedItem.task, date });
+                pushLocalSchedule({
+                  item: selectedItem,
+                  date: newDate,
+                });
               }
               handleUpateDateTask(selectedItem, newDate);
             }
           }}
           onCancel={() => {
-            setOpen(false);
+            setOpenDate(false);
           }}
         />
       </>
