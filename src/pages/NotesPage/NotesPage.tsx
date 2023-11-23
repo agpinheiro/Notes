@@ -218,11 +218,13 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           is24hourSource="device"
           confirmText="Salvar"
           cancelText="Cancelar"
-          onConfirm={(date) => {
+          onConfirm={(newDate) => {
             setOpen(false);
             if (selectedItem) {
-              pushLocalSchedule({ message: selectedItem.task, date });
-              handleUpateDateTask(selectedItem, date);
+              if (!selectedItem.done) {
+                pushLocalSchedule({ message: selectedItem.task, date });
+              }
+              handleUpateDateTask(selectedItem, newDate);
             }
           }}
           onCancel={() => {
