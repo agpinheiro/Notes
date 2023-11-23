@@ -10,6 +10,7 @@ export interface Task {
   task: string;
   done: boolean;
   priority?: Priority;
+  date?: Date;
 }
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
   onEdit: (item: Task) => void;
   onReIndex: (item: Task, value: number) => void;
   open: boolean;
+  onDate: (item: Task) => void;
 }
 
 const List: React.FC<Props> = ({
@@ -27,6 +29,7 @@ const List: React.FC<Props> = ({
   onDone,
   onEdit,
   onReIndex,
+  onDate,
   open,
 }) => {
   const renderItem: ListRenderItem<Task> = ({ item }) => {
@@ -40,6 +43,7 @@ const List: React.FC<Props> = ({
           onReIndex(item, value);
           scrollToOffset(theme.screnn.h * -0.1 * value);
         }}
+        onDate={() => onDate(item)}
         open={open}
       />
     );

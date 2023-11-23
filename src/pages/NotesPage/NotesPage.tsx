@@ -15,6 +15,12 @@ import { BackHandler } from 'react-native';
 import { generateUUID } from '../../utils/generateId';
 import ButtonFilter from '../../components/Filter/ButtonFilter';
 import Filter from '../../components/Filter/Filter';
+import DatePicker from 'react-native-date-picker';
+import { pushLocalSchedule } from '../../services/pushNotification';
+import {
+  checkNotifications,
+  requestNotifications,
+} from 'react-native-permissions';
 
 type NavProps = RouteProps<'Notes'>;
 
@@ -32,6 +38,10 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     priority: prioritySelected,
   } as NewTask);
   const [activeFilter, setActiveFilter] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
+  const [selectedItem, setItem] = useState<Task>();
+
   useEffect(() => {
     if (key === '') {
       navigation.navigate('Main');
@@ -50,6 +60,17 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       } as NewTask);
     };
   }, []);
+
+  async function requestPushNotificationPermission() {
+    try {
+      const { status } = await checkNotifications();
+      if (status !== 'granted') {
+        await requestNotifications(['alert', 'badge', 'sound']);
+      }
+    } catch (err) {
+      // console.error(err);
+    }
+  }
 
   useEffect(() => {
     const backAction = () => {
@@ -95,6 +116,13 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   };
 
   const handleUpateDoneTask = (item: Task) => {
+    const data: Task[] = updateStorageTask(key, item, tasks);
+    setTasks(data);
+    setFilteredTasks(data);
+  };
+
+  const handleUpateDateTask = (item: Task, date: Date) => {
+    item.date = date;
     const data: Task[] = updateStorageTask(key, item, tasks);
     setTasks(data);
     setFilteredTasks(data);
@@ -173,6 +201,33 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           }}
           onReIndex={(item: Task, value: number) => handleReindex(item, value)}
           open={filteredTasks !== tasks}
+          onDate={(item: Task) => {
+            requestPushNotificationPermission();
+            setOpen(true);
+            setItem(item);
+          }}
+        />
+
+        <DatePicker
+          modal
+          open={open}
+          date={date}
+          locale="pt-BR"
+          mode="datetime"
+          title="Escolha uma data"
+          is24hourSource="device"
+          confirmText="Salvar"
+          cancelText="Cancelar"
+          onConfirm={(date) => {
+            setOpen(false);
+            if (selectedItem) {
+              pushLocalSchedule({ message: selectedItem.task, date });
+              handleUpateDateTask(selectedItem, date);
+            }
+          }}
+          onCancel={() => {
+            setOpen(false);
+          }}
         />
       </>
     </Container>

@@ -8,9 +8,15 @@ interface Props {
   children: ReactNode;
   onPress: (value: number) => void;
   width: number;
+  onDate: () => void;
 }
 
-const SwipleBase: React.FC<Props> = ({ children, onPress, width = 0.2 }) => {
+const SwipleBase: React.FC<Props> = ({
+  children,
+  onPress,
+  width = 0.2,
+  onDate,
+}) => {
   const renderRight = () => {
     return (
       <View
@@ -22,6 +28,7 @@ const SwipleBase: React.FC<Props> = ({ children, onPress, width = 0.2 }) => {
         ]}
       >
         <TouchableOpacity
+          onPress={onDate}
           style={{
             backgroundColor: theme.colors.purple_dark,
             width: width === 0.2 ? '100%' : '50%',

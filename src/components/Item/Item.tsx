@@ -4,6 +4,7 @@ import { theme } from '../../theme/theme';
 import { Icon } from '@rneui/themed';
 import { Task } from '../../pages/NotesPage/components/List/List';
 import SwipleBase from '../SwipleBase/SwipleBase';
+import { formatDate } from '../../utils/format';
 
 interface Props {
   item: Task;
@@ -12,6 +13,7 @@ interface Props {
   onEdit: () => void;
   onReIndex: (value: number) => void;
   open: boolean;
+  onDate: () => void;
 }
 
 interface ColorProps {
@@ -29,6 +31,7 @@ const Item: React.FC<Props> = ({
   onPress,
   onEdit,
   onReIndex,
+  onDate,
   open,
 }) => {
   const handleColorBoder = () => {
@@ -68,9 +71,11 @@ const Item: React.FC<Props> = ({
     <SwipleBase
       width={open ? 0.2 : 0.4}
       onPress={(value: number) => onReIndex(value)}
+      onDate={onDate}
     >
       <TouchableOpacity
         onLongPress={onEdit}
+        activeOpacity={1}
         style={{
           backgroundColor: theme.colors.gray,
           width: '100%',
@@ -84,6 +89,17 @@ const Item: React.FC<Props> = ({
           borderColor: color.borderItem,
         }}
       >
+        <Text
+          style={{
+            color: theme.colors.white,
+            position: 'absolute',
+            top: 2,
+            right: 8,
+            fontSize: 12,
+          }}
+        >
+          {item.date ? formatDate(item.date) : ''}
+        </Text>
         <TouchableOpacity
           style={{
             height: '100%',
