@@ -122,7 +122,6 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       const deleteNotify = notifys.find(
         (notify) => notify.message === item.task,
       );
-      console.log(notifys, deleteNotify);
       if (deleteNotify) {
         PushNotification.cancelLocalNotification(deleteNotify.id);
       }
@@ -135,7 +134,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
 
   const handleUpateDateTask = (item: Task, date: Date) => {
     item.date = date;
-    item.schedule = true;
+    item.schedule = item.done ? false : true;
     const data: Task[] = updateStorageScheduleTask(key, item, tasks);
     setTasks(data);
     setFilteredTasks(data);
@@ -225,6 +224,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           modal
           open={openDate}
           date={new Date()}
+          minimumDate={new Date()}
           locale="pt-BR"
           mode="datetime"
           title="Escolha uma data"
@@ -233,7 +233,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           cancelText="Cancelar"
           onConfirm={(newDate) => {
             setOpenDate(false);
-            if (selectedItem && newDate > new Date()) {
+            if (selectedItem) {
               if (!selectedItem.done) {
                 pushLocalSchedule({
                   item: selectedItem,
