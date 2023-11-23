@@ -13,12 +13,20 @@ const App: React.FC = () => {
         channelName: 'NotesApp',
         channelId: 'com.notes.todolist',
         playSound: true,
-        soundName: 'default',
+        soundName: 'sound.mp3',
         vibrate: true,
         importance: 4,
       },
       (created) => console.log(created),
     );
+    /* PushNotification.localNotification({
+      title: 'Hello World!',
+      message: 'This is a test notification',
+      channelId: 'com.notes.todolist',
+      userInfo: {},
+      playSound: true,
+      soundName: 'sound.mp3',
+    }); */
   }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -237,6 +237,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
               if (!selectedItem.done) {
                 pushLocalSchedule({
                   item: selectedItem,
+                  key,
                   date: newDate,
                 });
               }
