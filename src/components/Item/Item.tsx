@@ -99,7 +99,7 @@ const Item: React.FC<Props> = ({
               alignItems: 'center',
             }}
           >
-            {item.schedule && (
+            {item.schedule && new Date() < item.date && (
               <Icon
                 name="megaphone"
                 type="foundation"
