@@ -11,6 +11,7 @@ export interface Task {
   done: boolean;
   priority?: Priority;
   date?: Date;
+  schedule?: boolean;
 }
 
 interface Props {

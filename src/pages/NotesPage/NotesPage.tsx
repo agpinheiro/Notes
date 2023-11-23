@@ -22,6 +22,7 @@ import {
   checkNotifications,
   requestNotifications,
 } from 'react-native-permissions';
+import PushNotification from 'react-native-push-notification';
 
 type NavProps = RouteProps<'Notes'>;
 
@@ -92,6 +93,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       task: task.task,
       priority: prioritySelected,
       done: false,
+      schedule: false,
     };
     const data = [newTask, ...tasks];
     setTasks(data);
@@ -116,6 +118,16 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   };
 
   const handleUpateDoneTask = (item: Task) => {
+    PushNotification.getScheduledLocalNotifications((notifys) => {
+      const deleteNotify = notifys.find(
+        (notify) => notify.message === item.task,
+      );
+      console.log(notifys, deleteNotify);
+      if (deleteNotify) {
+        PushNotification.cancelLocalNotification(deleteNotify.id);
+      }
+    });
+    item.schedule = false;
     const data: Task[] = updateStorageTask(key, item, tasks);
     setTasks(data);
     setFilteredTasks(data);
@@ -123,6 +135,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
 
   const handleUpateDateTask = (item: Task, date: Date) => {
     item.date = date;
+    item.schedule = true;
     const data: Task[] = updateStorageScheduleTask(key, item, tasks);
     setTasks(data);
     setFilteredTasks(data);

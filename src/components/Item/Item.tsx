@@ -89,17 +89,36 @@ const Item: React.FC<Props> = ({
           borderColor: color.borderItem,
         }}
       >
-        <Text
-          style={{
-            color: theme.colors.white,
-            position: 'absolute',
-            top: 2,
-            right: 8,
-            fontSize: 12,
-          }}
-        >
-          {item.date ? formatDate(item.date) : ''}
-        </Text>
+        {item.date && (
+          <View
+            style={{
+              flexDirection: 'row',
+              position: 'absolute',
+              top: 2,
+              right: 8,
+              alignItems: 'center',
+            }}
+          >
+            {item.schedule && (
+              <Icon
+                name="megaphone"
+                type="foundation"
+                size={12}
+                color={theme.colors.white}
+              />
+            )}
+            <Text
+              style={{
+                color: theme.colors.white,
+                marginLeft: 10,
+                fontSize: 12,
+              }}
+            >
+              {formatDate(item.date)}
+            </Text>
+          </View>
+        )}
+
         <TouchableOpacity
           style={{
             height: '100%',

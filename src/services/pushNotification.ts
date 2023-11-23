@@ -13,7 +13,7 @@ const pushLocalSchedule = ({ item, date }: Props) => {
     largeIcon: 'ic_launcher',
     smallIcon: 'ic_notification',
     vibrate: true,
-    title: `Prioridade: ${item.priority}`,
+    title: `Prioridade - ${item.priority}`,
     message: item.task,
     date,
     allowWhileIdle: true,
