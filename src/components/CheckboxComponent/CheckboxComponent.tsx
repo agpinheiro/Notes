@@ -24,7 +24,7 @@ const CheckboxComponent: React.FC<Props> = ({
     <TouchableOpacity
       style={{
         height: 50,
-        width: 50,
+        width: '33%',
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',

@@ -65,7 +65,7 @@ const Header: React.FC<Props> = ({
       {setPrioritySelected && (
         <View
           style={{
-            paddingHorizontal: 40,
+            paddingHorizontal: 20,
             width: '100%',
             position: 'absolute',
             height: theme.screnn.h * 0.06,
