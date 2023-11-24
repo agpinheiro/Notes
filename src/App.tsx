@@ -19,14 +19,6 @@ const App: React.FC = () => {
       },
       (created) => console.log(created),
     );
-    /* PushNotification.localNotification({
-      title: 'Hello World!',
-      message: 'This is a test notification',
-      channelId: 'com.notes.todolist',
-      userInfo: {},
-      playSound: true,
-      soundName: 'sound.mp3',
-    }); */
   }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -2,7 +2,6 @@ import { Icon } from '@rneui/themed';
 import React from 'react';
 import { Text } from 'react-native';
 import { TouchableOpacity, View } from 'react-native';
-import { theme } from '../../theme/theme';
 
 interface Props {
   name: string;
@@ -49,7 +48,7 @@ const CheckboxComponent: React.FC<Props> = ({
           <Icon name="check" type="feather" size={20} color={colors.selected} />
         )}
       </View>
-      <Text style={{ color: colors.name, marginLeft: 10, fontWeight: 900 }}>
+      <Text style={{ color: colors.name, marginLeft: 10, fontWeight: '900' }}>
         {name}
       </Text>
     </TouchableOpacity>

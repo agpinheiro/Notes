@@ -22,7 +22,7 @@ import { NewTask } from '../NotesPage/NotesPage';
 type NavProps = RouteProps<'Main'>;
 
 const Main: React.FC<NavProps> = ({ navigation }) => {
-  const [keys, setKeys] = useState<string[]>([]);
+  const [keys, setKeys] = useState<string[]>(getKeys('keys'));
   const [key, setKey] = useState<NewTask>({
     task: '',
     priority: 'Baixa',
@@ -30,11 +30,6 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const ItemSeparator = useCallback(() => {
     return <View style={{ height: 14 }} />;
-  }, []);
-
-  useEffect(() => {
-    const data = getKeys('keys');
-    setKeys(data);
   }, []);
 
   useEffect(() => {
@@ -73,7 +68,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
     setKeys(data);
   };
 
-  const handleAlert = (item: string) => {
+  const handleAlert = useCallback((item: string) => {
     Alert.alert(
       `Lista ${item} será deletada`,
       'Tem certeza que deseja perder essa lista permanentemente?.',
@@ -90,16 +85,16 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       ],
       { cancelable: true },
     );
-  };
+  }, []);
 
-  const emptyList = () => {
+  const emptyList = useCallback(() => {
     return (
       <EmptyComponent
         title="Você ainda não tem listas cadastradas"
         info="Agrupe suas tarefas de forma simples"
       />
     );
-  };
+  }, []);
 
   return (
     <Container>

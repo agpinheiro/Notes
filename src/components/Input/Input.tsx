@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useRef } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -47,18 +47,20 @@ const Input: React.FC<InputProps> = ({
     onPress();
   };
 
+  const clearDanger = useCallback(() => {
+    setDanger({
+      value: false,
+      message: '',
+    });
+  }, [setDanger]);
+
   useEffect(() => {
-    if (danger) {
-      const timeout = setTimeout(() => {
-        setDanger({
-          value: false,
-          message: '',
-        });
-      }, 4000);
+    if (danger.value) {
+      const timeout = setTimeout(clearDanger, 4000);
 
       return () => clearTimeout(timeout);
     }
-  }, [danger, setDanger]);
+  }, [clearDanger, danger]);
 
   return (
     <View style={styles.container}>

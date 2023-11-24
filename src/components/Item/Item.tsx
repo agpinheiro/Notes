@@ -33,6 +33,7 @@ const Item: React.FC<Props> = ({
   onReIndex,
   onDate,
   open,
+  id,
 }) => {
   const handleColorBoder = () => {
     if (item.priority === 'Alta') {

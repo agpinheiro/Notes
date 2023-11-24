@@ -9,13 +9,10 @@ interface Props {
 }
 
 const EmptyComponent: React.FC<Props> = ({ title, info }) => {
+  const w = theme.screnn.w * 0.2;
   return (
     <View style={styles.containerEmpty}>
-      <Logo
-        style={{ opacity: 0.7 }}
-        width={theme.screnn.w * 0.2}
-        height={theme.screnn.w * 0.2}
-      />
+      <Logo style={{ opacity: 0.7 }} width={w} height={w} />
       <Text style={styles.textEmpityTitle}>{title}</Text>
       <Text style={styles.textEmpityInfo}>{info}</Text>
     </View>

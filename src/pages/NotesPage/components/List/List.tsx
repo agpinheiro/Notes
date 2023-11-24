@@ -3,7 +3,6 @@ import { FlatList, ListRenderItem, View } from 'react-native';
 import EmptyComponent from '../../../../components/EmptyComponent/EmptyComponent';
 import Item from '../../../../components/Item/Item';
 import { Priority } from '../../../../components/Header/Header';
-import { theme } from '../../../../theme/theme';
 
 export interface Task {
   id: string;
@@ -33,7 +32,7 @@ const List: React.FC<Props> = ({
   onDate,
   open,
 }) => {
-  const renderItem: ListRenderItem<Task> = ({ item }) => {
+  const renderItem: ListRenderItem<Task> = ({ item, index }) => {
     return (
       <Item
         item={item}
@@ -42,7 +41,7 @@ const List: React.FC<Props> = ({
         onEdit={() => onEdit(item)}
         onReIndex={(value: number) => {
           onReIndex(item, value);
-          scrollToOffset(theme.screnn.h * -0.1 * value);
+          scrollToOffset(index, value);
         }}
         onDate={() => onDate(item)}
         open={open}
@@ -65,8 +64,17 @@ const List: React.FC<Props> = ({
 
   const flatlistRef: React.LegacyRef<FlatList<Task>> = useRef(null);
 
-  const scrollToOffset = (offset: number) => {
-    flatlistRef.current.scrollToOffset({ animated: true, offset });
+  const scrollToOffset = (index: number, value: number) => {
+    if (
+      (index === 0 && value === 1) ||
+      (tasks.length - 1 === index && value === -1)
+    ) {
+      return;
+    }
+    flatlistRef.current?.scrollToIndex({
+      animated: true,
+      index: index - value,
+    });
   };
 
   return (

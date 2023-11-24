@@ -30,8 +30,9 @@ export type NewTask = { task: string; priority: Priority };
 
 const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const key: string = route.params?.item || '';
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const storageTasks = getStorage(key);
+  const [tasks, setTasks] = useState<Task[]>(storageTasks);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>(storageTasks);
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
 
   const [prioritySelected, setPrioritySelected] = useState<Priority>('Baixa');
@@ -47,11 +48,18 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     if (key === '') {
       navigation.navigate('Main');
     }
-    const data = getStorage(key);
-    setTasks(data);
-    setFilteredTasks(data);
+    const backAction = () => {
+      navigation.goBack();
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
 
     return () => {
+      backHandler.remove();
       setTasks([]);
       setFilteredTasks([]);
 
@@ -72,20 +80,6 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       // console.error(err);
     }
   }
-
-  useEffect(() => {
-    const backAction = () => {
-      navigation.goBack();
-      return false;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-
-    return () => backHandler.remove();
-  }, []);
 
   const handleAddToStorage = () => {
     const newTask: Task = {

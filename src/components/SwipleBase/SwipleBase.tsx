@@ -95,7 +95,7 @@ const SwipleBase: React.FC<Props> = ({
   return (
     <Swipeable
       overshootRight={false}
-      renderRightActions={(_x, _y, e) => renderRight()}
+      renderRightActions={(_x, _y, e) => renderRight(e)}
     >
       {children}
     </Swipeable>

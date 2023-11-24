@@ -82,10 +82,7 @@ const Header: React.FC<Props> = ({
             }}
             name="Baixa"
             value={prioritySelected === 'Baixa'}
-            onPress={() => {
-              setPrioritySelected('Baixa');
-              setTask({ task, priority: prioritySelected });
-            }}
+            onPress={() => setPrioritySelected('Baixa')}
           />
           <CheckboxComponent
             colors={{
@@ -95,10 +92,7 @@ const Header: React.FC<Props> = ({
             }}
             name="Média"
             value={prioritySelected === 'Media'}
-            onPress={() => {
-              setPrioritySelected('Media');
-              setTask({ task, priority: prioritySelected });
-            }}
+            onPress={() => setPrioritySelected('Media')}
           />
           <CheckboxComponent
             colors={{
@@ -108,10 +102,7 @@ const Header: React.FC<Props> = ({
             }}
             name="Alta"
             value={prioritySelected === 'Alta'}
-            onPress={() => {
-              setPrioritySelected('Alta');
-              setTask({ task, priority: prioritySelected });
-            }}
+            onPress={() => setPrioritySelected('Alta')}
           />
         </View>
       )}
