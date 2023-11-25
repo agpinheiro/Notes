@@ -138,7 +138,9 @@ const styles = StyleSheet.create({
   },
   arrow: {
     position: 'absolute',
-    top: 15,
-    left: 15,
+    top: 10,
+    left: 0,
+    width: 50,
+    height: 50,
   },
 });

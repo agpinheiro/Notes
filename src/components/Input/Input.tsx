@@ -1,15 +1,10 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect } from 'react';
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { theme } from '../../theme/theme';
 import { Icon } from '@rneui/themed';
 import { NewTask } from '../../pages/NotesPage/NotesPage';
 import { Priority } from '../Header/Header';
+import { TextInput } from 'react-native-gesture-handler';
 
 export interface DangerProps {
   value: boolean;
@@ -27,6 +22,7 @@ export interface InputProps {
   ) => void | Dispatch<SetStateAction<DangerProps>>;
   priority?: Priority;
 }
+
 const Input: React.FC<InputProps> = ({
   task,
   setTask,

@@ -7,11 +7,15 @@ import {
 import NotesPage from '../pages/NotesPage/NotesPage';
 import Welcome from '../pages/Welcome/Welcome';
 import Main from '../pages/Main/Main';
+import DescriptionPage from '../pages/DescriptionPage/DescriptionPage';
+import { List } from '../services/store/List/reducer';
+import { Task } from '../services/store/Tasks/reducer';
 
 export type StackProps = {
   Welcome: undefined;
   Main: undefined;
-  Notes: { item: string } | undefined;
+  Notes: { item: List } | undefined;
+  Description: { task: Task } | undefined;
 };
 
 export type RouteProps<RouteName extends keyof StackProps> =
@@ -28,6 +32,7 @@ const Routes = () => {
           headerShown: false,
         }}
       >
+        <Stack.Screen name="Description" component={DescriptionPage} />
         <Stack.Screen name="Welcome" component={Welcome} />
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="Notes" component={NotesPage} />

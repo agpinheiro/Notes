@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Title from '../../components/Title/Title';
-import List, { Task } from './components/List/List';
-import {
-  deleteItemStorage,
-  getStorage,
-  setStorage,
-  updateStorageScheduleTask,
-  updateStorageTask,
-} from '../../services/storage';
+import List from './components/List/List';
 import Header, { Priority } from '../../components/Header/Header';
 import Container from '../../components/Cotainer/Container';
 import { RouteProps } from '../../routes/Routes';
@@ -23,18 +16,27 @@ import {
   requestNotifications,
 } from 'react-native-permissions';
 import PushNotification from 'react-native-push-notification';
+import { useAppSelector } from '../../hooks/redux';
+import {
+  Task,
+  addTask,
+  editIndexTask,
+  editTask,
+  removeTasks,
+} from '../../services/store/Tasks/reducer';
+import { useDispatch } from 'react-redux';
 
 type NavProps = RouteProps<'Notes'>;
 
 export type NewTask = { task: string; priority: Priority };
 
 const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
-  const key: string = route.params?.item || '';
-  const storageTasks = getStorage(key);
-  const [tasks, setTasks] = useState<Task[]>(storageTasks);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>(storageTasks);
+  const [key, setKey] = useState(route.params?.item.key || '');
+  const TasksState = useAppSelector((state) => state.Tasks);
+  const filterTasksToKey = TasksState.filter((t) => t.listId === key);
+  const [tasks, setTasks] = useState<Task[]>(filterTasksToKey);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>(filterTasksToKey);
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
-
   const [prioritySelected, setPrioritySelected] = useState<Priority>('Baixa');
   const [task, setTask] = useState<NewTask>({
     task: '',
@@ -43,7 +45,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const [activeFilter, setActiveFilter] = useState(false);
   const [openDate, setOpenDate] = useState(false);
   const [selectedItem, setItem] = useState<Task>();
-
+  const dispatch = useDispatch();
   useEffect(() => {
     if (key === '') {
       navigation.navigate('Main');
@@ -62,7 +64,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       backHandler.remove();
       setTasks([]);
       setFilteredTasks([]);
-
+      setKey('');
       setTask({
         task: '',
         priority: prioritySelected,
@@ -85,26 +87,28 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     const newTask: Task = {
       id: generateUUID(),
       task: task.task,
+      listId: key,
       priority: prioritySelected,
+      description: [],
       done: false,
       schedule: false,
+      updated_at: new Date().toISOString(),
     };
     const data = [newTask, ...tasks];
     setTasks(data);
     setFilteredTasks(data);
-
+    dispatch(addTask(newTask));
     setTask({
       task: '',
       priority: prioritySelected,
     } as NewTask);
-
-    setStorage(key, data);
   };
 
-  const handleDeleteItem = (id: string) => {
-    const data = deleteItemStorage(key, id);
-    setTasks(data);
-    setFilteredTasks(data);
+  const handleDeleteItem = (item: Task) => {
+    const newData = tasks.filter((t) => t.id !== item.id);
+    setTasks(newData);
+    setFilteredTasks(newData);
+    dispatch(removeTasks(item));
   };
 
   const handleDoneNumber = (): number => {
@@ -113,25 +117,30 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
 
   const handleUpateDoneTask = (item: Task) => {
     PushNotification.getScheduledLocalNotifications((notifys) => {
-      const deleteNotify = notifys.find(
-        (notify) => notify.message === item.task,
-      );
+      const deleteNotify = notifys.find((notify) => notify.id === item.id);
       if (deleteNotify) {
         PushNotification.cancelLocalNotification(deleteNotify.id);
       }
     });
-    item.schedule = false;
-    const data: Task[] = updateStorageTask(key, item, tasks);
-    setTasks(data);
-    setFilteredTasks(data);
+    const newTask = {
+      ...item,
+      schedule: false,
+      done: !item.done,
+    };
+    const newData = tasks.filter((t) => t.id !== item.id);
+    newData.push(newTask);
+    setTasks(newData);
+    setFilteredTasks(newData);
+    dispatch(editTask(item));
   };
 
   const handleUpateDateTask = (item: Task, date: Date) => {
     item.date = date;
     item.schedule = item.done ? false : true;
-    const data: Task[] = updateStorageScheduleTask(key, item, tasks);
-    setTasks(data);
-    setFilteredTasks(data);
+    const newData = tasks.filter((t) => t.id !== item.id);
+    newData.push(item);
+    setTasks(newData);
+    setFilteredTasks(newData);
   };
 
   const handleReindex = (item: Task, index: number) => {
@@ -149,7 +158,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
 
       newTasks.splice(currentIndex - index, 0, removedItem);
 
-      setStorage(key, newTasks);
+      dispatch(editIndexTask(newTasks));
       setFilteredTasks(newTasks);
       return newTasks;
     });
@@ -196,14 +205,14 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
         )}
         <List
           tasks={filteredTasks}
-          onPress={(id: string) => handleDeleteItem(id)}
+          onPress={(item: Task) => handleDeleteItem(item)}
           onDone={(item: Task) => handleUpateDoneTask(item)}
           onEdit={(item: Task) => {
             setTask({
               task: item.task,
               priority: item.priority ? item.priority : prioritySelected,
             });
-            handleDeleteItem(item.id);
+            handleDeleteItem(item);
           }}
           onReIndex={(item: Task, value: number) => handleReindex(item, value)}
           open={filteredTasks !== tasks}

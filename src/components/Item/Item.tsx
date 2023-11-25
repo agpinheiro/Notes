@@ -5,6 +5,7 @@ import { Icon } from '@rneui/themed';
 import { Task } from '../../pages/NotesPage/components/List/List';
 import SwipleBase from '../SwipleBase/SwipleBase';
 import { formatDate } from '../../utils/format';
+import { useNavigation } from '@react-navigation/native';
 
 interface Props {
   item: Task;
@@ -68,6 +69,8 @@ const Item: React.FC<Props> = ({
     return colors;
   };
   const color: ColorProps = handleColor();
+  const navigation = useNavigation();
+
   return (
     <SwipleBase
       width={open ? 0.2 : 0.4}
@@ -76,6 +79,7 @@ const Item: React.FC<Props> = ({
     >
       <TouchableOpacity
         onLongPress={onEdit}
+        onPress={() => navigation.navigate('Description', { task: item })}
         activeOpacity={1}
         style={{
           backgroundColor: theme.colors.gray,

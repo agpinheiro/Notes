@@ -2,20 +2,11 @@ import React, { useCallback, useRef } from 'react';
 import { FlatList, ListRenderItem, View } from 'react-native';
 import EmptyComponent from '../../../../components/EmptyComponent/EmptyComponent';
 import Item from '../../../../components/Item/Item';
-import { Priority } from '../../../../components/Header/Header';
-
-export interface Task {
-  id: string;
-  task: string;
-  done: boolean;
-  priority?: Priority;
-  date?: Date;
-  schedule?: boolean;
-}
+import { Task } from '../../../../services/store/Tasks/reducer';
 
 interface Props {
   tasks: Task[];
-  onPress: (id: string) => void;
+  onPress: (item: Task) => void;
   onDone: (item: Task) => void;
   onEdit: (item: Task) => void;
   onReIndex: (item: Task, value: number) => void;
@@ -37,7 +28,7 @@ const List: React.FC<Props> = ({
       <Item
         item={item}
         onDone={() => onDone(item)}
-        onPress={() => onPress(item.id)}
+        onPress={() => onPress(item)}
         onEdit={() => onEdit(item)}
         onReIndex={(value: number) => {
           onReIndex(item, value);

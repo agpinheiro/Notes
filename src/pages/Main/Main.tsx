@@ -13,21 +13,36 @@ import Container from '../../components/Cotainer/Container';
 import { RouteProps } from '../../routes/Routes';
 import { theme } from '../../theme/theme';
 import Header from '../../components/Header/Header';
-import { deleteKey, getKeys, setStorage } from '../../services/storage';
 import { Icon } from '@rneui/themed';
 import { DangerProps } from '../../components/Input/Input';
 import EmptyComponent from '../../components/EmptyComponent/EmptyComponent';
 import { NewTask } from '../NotesPage/NotesPage';
+import { generateUUID } from '../../utils/generateId';
+import { useDispatch } from 'react-redux';
+import {
+  List,
+  addList,
+  editList,
+  removeList,
+} from '../../services/store/List/reducer';
+import { useAppSelector } from '../../hooks/redux';
 
 type NavProps = RouteProps<'Main'>;
 
 const Main: React.FC<NavProps> = ({ navigation }) => {
-  const [keys, setKeys] = useState<string[]>(getKeys('keys'));
+  const Lists = useAppSelector((state) => state.Lists);
+  const [sharedKeys, setSharedKeys] = useState<List[]>(
+    Lists.filter((l) => l.shared),
+  );
+  const [keys, setKeys] = useState<List[]>(Lists.filter((l) => !l.shared));
   const [key, setKey] = useState<NewTask>({
     task: '',
     priority: 'Baixa',
   } as NewTask);
+  const [selectedList, setSelectedList] = useState(true);
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
+  const dispatch = useDispatch();
+
   const ItemSeparator = useCallback(() => {
     return <View style={{ height: 14 }} />;
   }, []);
@@ -45,11 +60,11 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
     return () => backHandler.remove();
   }, []);
 
-  const handleAddKeys = () => {
+  const handleAddKeys = (item: string) => {
     if (
       keys.some(
         (k) =>
-          k.toLocaleLowerCase().trim() === key.task.toLocaleLowerCase().trim(),
+          k.key.toLocaleLowerCase().trim() === item.toLocaleLowerCase().trim(),
       )
     ) {
       return setDanger({
@@ -58,24 +73,35 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       });
     }
 
-    const data = [key.task.trim(), ...keys];
-    setKeys(data);
-    setStorage('keys', data);
+    const newKey: List = {
+      id: generateUUID(),
+      key: item,
+      shared: false,
+    };
+
+    setKeys([newKey, ...keys]);
+    dispatch(addList(newKey));
   };
 
-  const handleDeleteKey = (keyStorage: string, selected: string) => {
-    const data = deleteKey(keyStorage, selected);
-    setKeys(data);
+  const handleDeleteKey = (item: List) => {
+    dispatch(removeList(item));
+    const filter = keys.filter((k) => k.id !== item.id);
+    setKeys(filter);
   };
 
-  const handleAlert = useCallback((item: string) => {
+  const handleAlert = (item: List) => {
     Alert.alert(
-      `Lista ${item} será deletada`,
+      `Lista ${item.key} será deletada`,
       'Tem certeza que deseja perder essa lista permanentemente?.',
       [
         {
           text: 'OK',
-          onPress: () => handleDeleteKey('keys', item),
+          onPress: () => {
+            if (!selectedList) {
+              handleDeleteSharedKey(item);
+            }
+            handleDeleteKey(item);
+          },
         },
         {
           text: 'Cancelar',
@@ -85,7 +111,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       ],
       { cancelable: true },
     );
-  }, []);
+  };
 
   const emptyList = useCallback(() => {
     return (
@@ -95,6 +121,24 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       />
     );
   }, []);
+  const handleAddSharedList = (item: List) => {
+    item.shared = true;
+    const filter = keys.filter((k) => k.id !== item.id);
+    setKeys(filter);
+    setSharedKeys([item, ...sharedKeys]);
+    dispatch(editList(item));
+  };
+
+  const handleDeleteSharedKey = (item: List) => {
+    item.shared = false;
+    const filter = sharedKeys.filter((k) => k.id !== item.id);
+    setKeys((prev) => {
+      prev.push(item);
+      return prev;
+    });
+    setSharedKeys(filter);
+    dispatch(editList(item));
+  };
 
   return (
     <Container>
@@ -106,7 +150,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
           task={key.task}
           setTask={(value) => setKey(value)}
           onPress={() => {
-            handleAddKeys();
+            handleAddKeys(key.task);
             setKey({
               task: '',
               priority: 'Baixa',
@@ -120,7 +164,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
           style={{
             borderBottomColor: theme.colors.gray200,
             borderBottomWidth: 2,
-            marginTop: '12%',
+            marginTop: '8%',
             width: theme.screnn.w - 30,
             flexDirection: 'row',
             alignItems: 'center',
@@ -128,13 +172,51 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
             paddingVertical: 10,
           }}
         >
-          <Text style={styles.textRow}>Minhas Listas Salvas</Text>
-          <Text style={styles.numberRow}>{keys.length}</Text>
+          <TouchableOpacity
+            onPress={() => setSelectedList(true)}
+            style={{ flexDirection: 'row' }}
+          >
+            <Text
+              style={[
+                styles.textRow,
+                {
+                  color: selectedList
+                    ? theme.colors.blue_dark
+                    : theme.colors.white,
+                },
+              ]}
+            >
+              Pessoais
+            </Text>
+            <Text style={styles.numberRow}>{keys.length}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setSelectedList(false)}
+            style={{ flexDirection: 'row' }}
+          >
+            <Text
+              style={[
+                styles.textRow,
+                {
+                  color: selectedList
+                    ? theme.colors.white
+                    : theme.colors.purple_dark,
+                },
+              ]}
+            >
+              Compartilhadas
+            </Text>
+            <Text style={styles.numberRow}>{sharedKeys.length}</Text>
+          </TouchableOpacity>
         </View>
+
         <FlatList
-          data={keys}
+          data={selectedList ? keys : sharedKeys}
           keyExtractor={(item, index) => index.toString()}
-          style={{ marginTop: '8%' }}
+          style={{
+            marginTop: '4%',
+          }}
           ListEmptyComponent={emptyList}
           ItemSeparatorComponent={ItemSeparator}
           contentContainerStyle={{ paddingBottom: 60 }}
@@ -152,18 +234,34 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
               onPress={() => navigation.navigate('Notes', { item: item })}
             >
               <Text numberOfLines={1} style={styles.textButtons}>
-                {item}
+                {item.key}
               </Text>
-              <Pressable onPress={() => handleAlert(item)}>
-                {({ pressed }) => (
-                  <Icon
-                    name="trash"
-                    type="font-awesome"
-                    size={28}
-                    color={pressed ? theme.colors.danger : theme.colors.white}
-                  />
-                )}
-              </Pressable>
+              <View style={{ height: '100%', justifyContent: 'space-between' }}>
+                <Pressable
+                  onPress={() =>
+                    selectedList ? handleAddSharedList(item) : {}
+                  }
+                >
+                  {({ pressed }) => (
+                    <Icon
+                      name={selectedList ? 'share' : 'sync'}
+                      type="materialicon"
+                      size={24}
+                      color={pressed ? theme.colors.danger : theme.colors.white}
+                    />
+                  )}
+                </Pressable>
+                <Pressable onPress={() => handleAlert(item)}>
+                  {({ pressed }) => (
+                    <Icon
+                      name="trash"
+                      type="font-awesome"
+                      size={24}
+                      color={pressed ? theme.colors.danger : theme.colors.white}
+                    />
+                  )}
+                </Pressable>
+              </View>
             </TouchableOpacity>
           )}
         />
@@ -217,7 +315,6 @@ const styles = StyleSheet.create({
   textRow: {
     fontSize: 16,
     fontWeight: '900',
-    color: theme.colors.blue,
   },
   containerEmpty: {
     alignItems: 'center',

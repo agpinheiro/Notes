@@ -5,6 +5,9 @@ import { theme } from './theme/theme';
 import Routes from './routes/Routes';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import PushNotification from 'react-native-push-notification';
+import socket from './services/socket';
+import { Provider } from 'react-redux';
+import { store } from './services/store/store';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -19,12 +22,18 @@ const App: React.FC = () => {
       },
       (created) => console.log(created),
     );
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar backgroundColor={theme.colors.black} />
-        <Routes />
+        <Provider store={store}>
+          <StatusBar backgroundColor={theme.colors.black} />
+          <Routes />
+        </Provider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
