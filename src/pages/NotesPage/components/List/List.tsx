@@ -14,7 +14,7 @@ interface Props {
   onDate: (item: Task) => void;
 }
 
-const List: React.FC<Props> = ({
+const ListComponent: React.FC<Props> = ({
   tasks,
   onPress,
   onDone,
@@ -91,4 +91,4 @@ const List: React.FC<Props> = ({
   );
 };
 
-export default List;
+export default ListComponent;

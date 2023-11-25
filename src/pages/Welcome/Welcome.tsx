@@ -8,9 +8,7 @@ import LottieView from 'lottie-react-native';
 import { theme } from '../../theme/theme';
 import { localStorage } from '../../services/storage';
 import { useDispatch } from 'react-redux';
-import { setLists } from '../../services/store/List/reducer';
-import { setTasks } from '../../services/store/Tasks/reducer';
-import { setDescriptions } from '../../services/store/Desriptions/reducer';
+import { setReducer } from '../../services/store/ITaskList/reducer';
 
 type NavProps = RouteProps<'Welcome'>;
 
@@ -18,12 +16,8 @@ const Welcome: React.FC<NavProps> = ({ navigation }) => {
   const [opacity, setOpacity] = useState(0);
   const dispatch = useDispatch();
   useEffect(() => {
-    const tasks = localStorage.getStorage('tasks');
-    const keys = localStorage.getStorage('lists');
-    const descriptions = localStorage.getStorage('desc');
-    dispatch(setLists(keys));
-    dispatch(setTasks(tasks));
-    dispatch(setDescriptions(descriptions));
+    const tasks = localStorage.getStorage('content');
+    dispatch(setReducer(tasks));
     const targetOpacity = 1; // Valor final que queremos alcançar
     const duration = 1000; // 1 segundo em milissegundos
     const increment = 0.02; // O quanto queremos incrementar a cada intervalo

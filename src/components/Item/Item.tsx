@@ -79,7 +79,7 @@ const Item: React.FC<Props> = ({
     >
       <TouchableOpacity
         onLongPress={onEdit}
-        onPress={() => navigation.navigate('Description', { task: item })}
+        onPress={() => navigation.navigate('Description', { item: item })}
         activeOpacity={1}
         style={{
           backgroundColor: theme.colors.gray,

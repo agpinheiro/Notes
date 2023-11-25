@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import Title from '../../components/Title/Title';
-import List from './components/List/List';
 import Header, { Priority } from '../../components/Header/Header';
 import Container from '../../components/Cotainer/Container';
 import { RouteProps } from '../../routes/Routes';
@@ -16,26 +15,34 @@ import {
   requestNotifications,
 } from 'react-native-permissions';
 import PushNotification from 'react-native-push-notification';
-import { useAppSelector } from '../../hooks/redux';
-import {
-  Task,
-  addTask,
-  editIndexTask,
-  editTask,
-  removeTasks,
-} from '../../services/store/Tasks/reducer';
 import { useDispatch } from 'react-redux';
+import socket from '../../services/socket/socket';
+import ListComponent from './components/List/List';
+import {
+  IList,
+  Task,
+  addTaskReducer,
+  editIndexTaskReducer,
+  editTaskReducer,
+  removeTasksReducer,
+} from '../../services/store/ITaskList/reducer';
+import { useAppSelector } from '../../hooks/redux';
+import { userStorage } from '../../services/storage';
 
 type NavProps = RouteProps<'Notes'>;
 
 export type NewTask = { task: string; priority: Priority };
 
 const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
-  const [key, setKey] = useState(route.params?.item.key || '');
-  const TasksState = useAppSelector((state) => state.Tasks);
-  const filterTasksToKey = TasksState.filter((t) => t.listId === key);
-  const [tasks, setTasks] = useState<Task[]>(filterTasksToKey);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>(filterTasksToKey);
+  const Lists = route.params?.item || ({} as IList);
+  const ListsReducer = useAppSelector((state) => state.ITaskList);
+  console.log(ListsReducer);
+  const FilterLists = ListsReducer.find((list) => list.id === Lists.id);
+  const [key, setKey] = useState<IList>(Lists);
+  const [tasks, setTasks] = useState<Task[]>(FilterLists?.tasks || []);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>(
+    FilterLists?.tasks || [],
+  );
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const [prioritySelected, setPrioritySelected] = useState<Priority>('Baixa');
   const [task, setTask] = useState<NewTask>({
@@ -47,7 +54,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const [selectedItem, setItem] = useState<Task>();
   const dispatch = useDispatch();
   useEffect(() => {
-    if (key === '') {
+    if (key.id === '') {
       navigation.navigate('Main');
     }
     const backAction = () => {
@@ -64,7 +71,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       backHandler.remove();
       setTasks([]);
       setFilteredTasks([]);
-      setKey('');
+      setKey({} as IList);
       setTask({
         task: '',
         priority: prioritySelected,
@@ -87,28 +94,35 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     const newTask: Task = {
       id: generateUUID(),
       task: task.task,
-      listId: key,
+      listId: key.list.id,
       priority: prioritySelected,
       description: [],
       done: false,
+      user: userStorage.getStorage('user'),
       schedule: false,
-      updated_at: new Date().toISOString(),
+      deleted: false,
     };
     const data = [newTask, ...tasks];
     setTasks(data);
     setFilteredTasks(data);
-    dispatch(addTask(newTask));
+    dispatch(addTaskReducer(newTask));
     setTask({
       task: '',
       priority: prioritySelected,
     } as NewTask);
+    if (key.list.shared) {
+      socket.emit('updatedList', data);
+    }
   };
 
   const handleDeleteItem = (item: Task) => {
     const newData = tasks.filter((t) => t.id !== item.id);
     setTasks(newData);
     setFilteredTasks(newData);
-    dispatch(removeTasks(item));
+    dispatch(removeTasksReducer(item));
+    if (key.list.shared) {
+      socket.emit('deletedList', newData);
+    }
   };
 
   const handleDoneNumber = (): number => {
@@ -126,21 +140,33 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       ...item,
       schedule: false,
       done: !item.done,
+      updated_at: new Date().toISOString(),
+      user: userStorage.getStorage('user'),
     };
     const newData = tasks.filter((t) => t.id !== item.id);
     newData.push(newTask);
     setTasks(newData);
     setFilteredTasks(newData);
-    dispatch(editTask(item));
+    dispatch(editTaskReducer(item));
+    if (key.list.shared) {
+      socket.emit('updatedList', newData);
+    }
   };
 
   const handleUpateDateTask = (item: Task, date: Date) => {
-    item.date = date;
-    item.schedule = item.done ? false : true;
+    const updateTask: Task = {
+      ...item,
+      date: date,
+      schedule: item.done ? false : true,
+      user: userStorage.getStorage('user'),
+    };
     const newData = tasks.filter((t) => t.id !== item.id);
-    newData.push(item);
+    newData.unshift(updateTask);
     setTasks(newData);
     setFilteredTasks(newData);
+    if (key.list.shared) {
+      socket.emit('updatedList', newData);
+    }
   };
 
   const handleReindex = (item: Task, index: number) => {
@@ -158,7 +184,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
 
       newTasks.splice(currentIndex - index, 0, removedItem);
 
-      dispatch(editIndexTask(newTasks));
+      dispatch(editIndexTaskReducer(newTasks));
       setFilteredTasks(newTasks);
       return newTasks;
     });
@@ -203,7 +229,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
             }}
           />
         )}
-        <List
+        <ListComponent
           tasks={filteredTasks}
           onPress={(item: Task) => handleDeleteItem(item)}
           onDone={(item: Task) => handleUpateDoneTask(item)}
@@ -240,7 +266,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
               if (!selectedItem.done) {
                 pushLocalSchedule({
                   item: selectedItem,
-                  key,
+                  key: key.list.key,
                   date: newDate,
                 });
               }

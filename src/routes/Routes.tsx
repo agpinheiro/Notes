@@ -8,14 +8,13 @@ import NotesPage from '../pages/NotesPage/NotesPage';
 import Welcome from '../pages/Welcome/Welcome';
 import Main from '../pages/Main/Main';
 import DescriptionPage from '../pages/DescriptionPage/DescriptionPage';
-import { List } from '../services/store/List/reducer';
-import { Task } from '../services/store/Tasks/reducer';
+import { IList, Task } from '../services/store/ITaskList/reducer';
 
 export type StackProps = {
   Welcome: undefined;
   Main: undefined;
-  Notes: { item: List } | undefined;
-  Description: { task: Task } | undefined;
+  Notes: { item: IList } | undefined;
+  Description: { item: Task } | undefined;
 };
 
 export type RouteProps<RouteName extends keyof StackProps> =

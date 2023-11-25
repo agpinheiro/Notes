@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   ListRenderItem,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -10,45 +9,51 @@ import {
 import Container from '../../components/Cotainer/Container';
 import { RouteProps } from '../../routes/Routes';
 import { theme } from '../../theme/theme';
-import { Icon } from '@rneui/themed';
 import EmptyComponent from '../../components/EmptyComponent/EmptyComponent';
 import { FlatList } from 'react-native-gesture-handler';
 import InputDescription from './components/InputDescription/InputDescription';
 import { generateUUID } from '../../utils/generateId';
+import { useDispatch } from 'react-redux';
+import Header from '../../components/Header/Header';
+import { DangerProps } from '../../components/Input/Input';
+import { NewTask } from '../NotesPage/NotesPage';
 import {
   Description,
-  Task,
-  editTask,
-} from '../../services/store/Tasks/reducer';
+  editDescriptionReducer,
+  removeDescriptionReducer,
+} from '../../services/store/ITaskList/reducer';
 import { useAppSelector } from '../../hooks/redux';
-import { useDispatch } from 'react-redux';
-import { editDescription } from '../../services/store/Desriptions/reducer';
 
 type NavProps = RouteProps<'Description'>;
 
 const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
-  const Descriptions = useAppSelector((state) => state.Description);
-  const [description, setDescription] = useState<Description[]>([]);
+  const Task = route.params?.item;
+  const Lists = useAppSelector((state) => state.ITaskList);
+  const selectList = Lists.find((l) => l.list.id === Task?.listId);
+  const selectTask = selectList?.tasks.find((t) => t.id === Task?.id);
+  const [description, setDescription] = useState<Description[]>(
+    selectTask?.description || [],
+  );
+  const [titleInput, setTitleInput] = useState<NewTask>({
+    task: '',
+    priority: 'Baixa',
+  } as NewTask);
   const dispatch = useDispatch();
+
   useEffect(() => {
-    if (!route.params?.task) {
+    if (!Task) {
       navigation.navigate('Notes');
-    } else {
-      setDescription(
-        Descriptions.filter((desc) => desc.taskId === route.params?.task.id),
-      );
     }
     return () => {
       setDescription([]);
     };
-  }, []);
+  }, [Task, navigation]);
 
   const handleUpateDateTask = (item: Description) => {
     const filter = description.filter((desc) => desc.id !== item.id);
-
     filter.unshift(item);
     setDescription(filter);
-    dispatch(editDescription(item));
+    dispatch(editDescriptionReducer(item));
   };
 
   const handleColorBoder = useCallback(
@@ -64,7 +69,11 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
     [],
   );
 
-  const color = handleColorBoder(route.params?.task.priority);
+  const itemSeparator = useCallback(() => {
+    return <View style={{ height: 14 }} />;
+  }, []);
+
+  const color = handleColorBoder(selectTask?.priority);
 
   const handleAddDescription = () => {
     setDescription([
@@ -72,18 +81,23 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
       {
         id: generateUUID(),
         type: 'input',
-        taskId: route.params?.task.id!,
-        details: 'Clique aqui para editar',
-        title: 'Titulo',
+        taskId: Task?.id!,
+        listId: Task?.listId!,
+        details: '',
+        title: titleInput.task,
       },
     ]);
+    setTitleInput({
+      task: '',
+      priority: 'Baixa',
+    } as NewTask);
   };
 
   const emptyList = useCallback(() => {
     return (
       <TouchableOpacity
         onPress={handleAddDescription}
-        style={{ marginTop: '30%' }}
+        style={{ marginTop: '20%' }}
       >
         <EmptyComponent
           title="Você ainda não informações adicionais"
@@ -101,7 +115,9 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
         }
         description={item}
         onLongPress={() => handleAlert(item)}
-        onSave={(desc: Description) => handleUpateDateTask(desc)}
+        onSave={(desc: Description) => {
+          handleUpateDateTask(desc);
+        }}
       />
     );
   };
@@ -116,7 +132,7 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
           onPress: () => {
             const filter = description.filter((desc) => desc.id !== item.id);
 
-            dispatch(editDescription(item));
+            dispatch(removeDescriptionReducer(item));
             setDescription(filter);
           },
         },
@@ -130,94 +146,44 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
     );
   };
 
+  const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
+
   return (
     <Container style={{ borderWidth: 1, borderColor: color }}>
-      <TouchableOpacity
-        onPress={() => navigation.navigate('Notes')}
-        style={styles.arrow}
-      >
-        <Icon
-          name="arrowleft"
-          type="antdesign"
-          size={24}
-          color={theme.colors.white}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
+      <Header
+        titlePart1="NO"
+        titlePart2="TES"
+        route="Notes"
+        task={titleInput.task}
+        setTask={setTitleInput}
         onPress={handleAddDescription}
-        style={[
-          styles.container,
-          { backgroundColor: color, marginBottom: '5%' },
-        ]}
-      >
-        <View style={[styles.row]}>
-          <Text style={[styles.text, { fontSize: 18 }]}>
-            {route.params?.task.task}
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <View
-        style={[
-          styles.row,
-          {
-            justifyContent: 'space-between',
-            width: '80%',
-            alignSelf: 'center',
-            paddingBottom: 10,
-          },
-        ]}
+        placeholder="Adcione informações à nota"
+        danger={danger}
+        setDanger={setDanger}
       />
+      <Text
+        style={{
+          fontWeight: '800',
+          fontSize: 18,
+          color: color,
+          width: '100%',
+          marginHorizontal: '4%',
+          marginTop: '10%',
+        }}
+      >
+        Nota: {Task?.task}
+      </Text>
       <FlatList
         data={description}
         keyExtractor={(_, index) => index.toString()}
         ListEmptyComponent={emptyList}
+        style={{ marginTop: '2%' }}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        ItemSeparatorComponent={itemSeparator}
+        contentContainerStyle={{ paddingBottom: 150 }}
       />
     </Container>
   );
 };
 
 export default DescriptionPage;
-
-const styles = StyleSheet.create({
-  container: {
-    width: '80%',
-    alignSelf: 'center',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  text: {
-    color: theme.colors.white,
-    fontSize: 18,
-    fontWeight: '900',
-    textAlign: 'center',
-  },
-  arrow: {
-    width: '100%',
-    paddingTop: 15,
-    alignItems: 'flex-start',
-    paddingLeft: 15,
-    paddingVertical: 10,
-  },
-  containerInput: {
-    width: theme.screnn.w * 0.9,
-    marginTop: 4,
-    borderRadius: 10,
-    alignSelf: 'center',
-  },
-  input: {
-    marginLeft: '3%',
-    fontSize: 14,
-    color: 'white',
-    width: theme.screnn.w * 0.84,
-  },
-});

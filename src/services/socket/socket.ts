@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { token } from '../config/index.json';
+import { token } from '../../config/index.json';
 
 const socket = io('http://192.168.0.115:3002');
 

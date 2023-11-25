@@ -19,22 +19,26 @@ import EmptyComponent from '../../components/EmptyComponent/EmptyComponent';
 import { NewTask } from '../NotesPage/NotesPage';
 import { generateUUID } from '../../utils/generateId';
 import { useDispatch } from 'react-redux';
-import {
-  List,
-  addList,
-  editList,
-  removeList,
-} from '../../services/store/List/reducer';
 import { useAppSelector } from '../../hooks/redux';
+import socket from '../../services/socket/socket';
+import {
+  IList,
+  addListReducer,
+  addTaskReducer,
+  editListReducer,
+  removeListReducer,
+} from '../../services/store/ITaskList/reducer';
 
 type NavProps = RouteProps<'Main'>;
 
 const Main: React.FC<NavProps> = ({ navigation }) => {
-  const Lists = useAppSelector((state) => state.Lists);
-  const [sharedKeys, setSharedKeys] = useState<List[]>(
-    Lists.filter((l) => l.shared),
+  const Lists = useAppSelector((state) => state.ITaskList);
+  const [sharedKeys, setSharedKeys] = useState<IList[]>(
+    Lists.filter((l) => l.list.shared),
   );
-  const [keys, setKeys] = useState<List[]>(Lists.filter((l) => !l.shared));
+  const [keys, setKeys] = useState<IList[]>(
+    Lists.filter((l) => !l.list.shared),
+  );
   const [key, setKey] = useState<NewTask>({
     task: '',
     priority: 'Baixa',
@@ -64,7 +68,8 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
     if (
       keys.some(
         (k) =>
-          k.key.toLocaleLowerCase().trim() === item.toLocaleLowerCase().trim(),
+          k.list.key.toLocaleLowerCase().trim() ===
+          item.toLocaleLowerCase().trim(),
       )
     ) {
       return setDanger({
@@ -73,25 +78,31 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       });
     }
 
-    const newKey: List = {
+    const newKey: IList = {
       id: generateUUID(),
-      key: item,
-      shared: false,
+      list: {
+        id: generateUUID(),
+        key: item,
+        shared: false,
+        owner: 'string',
+        updated_at: new Date().toISOString(),
+      },
+      tasks: [],
     };
 
     setKeys([newKey, ...keys]);
-    dispatch(addList(newKey));
+    dispatch(addListReducer(newKey));
   };
 
-  const handleDeleteKey = (item: List) => {
-    dispatch(removeList(item));
+  const handleDeleteKey = (item: IList) => {
+    dispatch(removeListReducer(item));
     const filter = keys.filter((k) => k.id !== item.id);
     setKeys(filter);
   };
 
-  const handleAlert = (item: List) => {
+  const handleAlert = (item: IList) => {
     Alert.alert(
-      `Lista ${item.key} será deletada`,
+      `Lista ${item.list.key} será deletada`,
       'Tem certeza que deseja perder essa lista permanentemente?.',
       [
         {
@@ -121,23 +132,25 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       />
     );
   }, []);
-  const handleAddSharedList = (item: List) => {
-    item.shared = true;
+  const handleAddSharedList = (item: IList) => {
+    const newItem: IList = {
+      ...item,
+      list: {
+        ...item.list,
+        shared: true,
+      },
+    };
     const filter = keys.filter((k) => k.id !== item.id);
     setKeys(filter);
-    setSharedKeys([item, ...sharedKeys]);
-    dispatch(editList(item));
+    setSharedKeys([newItem, ...sharedKeys]);
+    dispatch(editListReducer(newItem));
+    socket.emit('sharedList', newItem.id);
   };
 
-  const handleDeleteSharedKey = (item: List) => {
-    item.shared = false;
+  const handleDeleteSharedKey = (item: IList) => {
     const filter = sharedKeys.filter((k) => k.id !== item.id);
-    setKeys((prev) => {
-      prev.push(item);
-      return prev;
-    });
     setSharedKeys(filter);
-    dispatch(editList(item));
+    dispatch(removeListReducer(item));
   };
 
   return (
@@ -234,7 +247,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
               onPress={() => navigation.navigate('Notes', { item: item })}
             >
               <Text numberOfLines={1} style={styles.textButtons}>
-                {item.key}
+                {item.list.key}
               </Text>
               <View style={{ height: '100%', justifyContent: 'space-between' }}>
                 <Pressable
