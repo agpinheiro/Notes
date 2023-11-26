@@ -44,6 +44,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const [filteredTasks, setFilteredTasks] = useState<Task[]>(
     FilterLists?.tasks || [],
   );
+  console.log(key);
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const [prioritySelected, setPrioritySelected] = useState<Priority>('Baixa');
   const [task, setTask] = useState<NewTask>({
@@ -94,7 +95,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
         priority: prioritySelected,
       } as NewTask);
     };
-  }, [dispatch, key.id, navigation, prioritySelected]);
+  }, []);
 
   async function requestPushNotificationPermission() {
     try {
@@ -126,6 +127,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       listId: key.list.id,
       priority: prioritySelected,
       description: [],
+      date: new Date().toISOString(),
       done: false,
       user: userStorage.getStorage('user'),
       schedule: false,
