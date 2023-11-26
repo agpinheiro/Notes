@@ -11,6 +11,7 @@ import { store } from './services/store/store';
 import DeviceInfo from 'react-native-device-info';
 import { userStorage } from './services/storage';
 
+// type Url = { url: string };
 const App: React.FC = () => {
   useEffect(() => {
     PushNotification.createChannel(
@@ -30,9 +31,36 @@ const App: React.FC = () => {
     if (!userName || userName === 'User') {
       getDeviceName();
     }
+    /* const handleDeepLink = ({ url }: Url) => {
+      const bar = url.lastIndexOf('/');
+      const id = url.substring(bar + 1);
+
+      console.log('Deep link recebido:', id);
+      console.log(id.length === generateUUID().length);
+      if (id.length === generateUUID().length) {
+        socket.emit('room', id);
+
+        socket.on('initialList', (data: IList) => {
+          console.log(data);
+        });
+      }
+    }; */
+
+    // Adicione um ouvinte para deep links
+    // Linking.addEventListener('url', handleDeepLink);
+
+    // Verifique se há deep link inicial ao iniciar o aplicativo
+    /* if (Platform.OS === 'android') {
+      Linking.getInitialURL().then((url) => {
+        if (url) {
+          handleDeepLink({ url });
+        }
+      });
+    } */
 
     return () => {
       socket.disconnect();
+      // Linking.removeAllListeners('url');
     };
   }, []);
 

@@ -23,11 +23,13 @@ import {
   Task,
   addTaskReducer,
   editIndexTaskReducer,
+  editListReducer,
   editTaskReducer,
   removeTasksReducer,
 } from '../../services/store/ITaskList/reducer';
 import { useAppSelector } from '../../hooks/redux';
 import { userStorage } from '../../services/storage';
+import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
 
 type NavProps = RouteProps<'Notes'>;
 
@@ -36,7 +38,6 @@ export type NewTask = { task: string; priority: Priority };
 const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const Lists = route.params?.item || ({} as IList);
   const ListsReducer = useAppSelector((state) => state.ITaskList);
-  console.log(ListsReducer);
   const FilterLists = ListsReducer.find((list) => list.id === Lists.id);
   const [key, setKey] = useState<IList>(Lists);
   const [tasks, setTasks] = useState<Task[]>(FilterLists?.tasks || []);
@@ -53,6 +54,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const [openDate, setOpenDate] = useState(false);
   const [selectedItem, setItem] = useState<Task>();
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (key.id === '') {
       navigation.navigate('Main');
@@ -67,6 +69,12 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       backAction,
     );
 
+    socket.on('updatedList', (data: IList) => {
+      setTasks(data.tasks);
+      setFilteredTasks(data.tasks);
+      dispatch(editListReducer(data));
+    });
+
     return () => {
       backHandler.remove();
       setTasks([]);
@@ -77,7 +85,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
         priority: prioritySelected,
       } as NewTask);
     };
-  }, []);
+  }, [dispatch, key.id, navigation, prioritySelected]);
 
   async function requestPushNotificationPermission() {
     try {
@@ -89,6 +97,18 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
       // console.error(err);
     }
   }
+
+  const handleDataEmitter = (data: Task[]) => {
+    const emitter = {
+      id: key.id,
+      list: {
+        ...key.list,
+        updated_at: new Date().toISOString(),
+      },
+      tasks: data,
+    };
+    handleEmmitterAndUpdatedListsShared(emitter);
+  };
 
   const handleAddToStorage = () => {
     const newTask: Task = {
@@ -105,13 +125,13 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     const data = [newTask, ...tasks];
     setTasks(data);
     setFilteredTasks(data);
-    dispatch(addTaskReducer(newTask));
+    dispatch(editTaskReducer(newTask));
     setTask({
       task: '',
       priority: prioritySelected,
     } as NewTask);
     if (key.list.shared) {
-      socket.emit('updatedList', data);
+      handleDataEmitter(data);
     }
   };
 
@@ -121,7 +141,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     setFilteredTasks(newData);
     dispatch(removeTasksReducer(item));
     if (key.list.shared) {
-      socket.emit('deletedList', newData);
+      handleDataEmitter(newData);
     }
   };
 
@@ -149,7 +169,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     setFilteredTasks(newData);
     dispatch(editTaskReducer(item));
     if (key.list.shared) {
-      socket.emit('updatedList', newData);
+      handleDataEmitter(newData);
     }
   };
 
@@ -165,7 +185,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     setTasks(newData);
     setFilteredTasks(newData);
     if (key.list.shared) {
-      socket.emit('updatedList', newData);
+      handleDataEmitter(newData);
     }
   };
 
@@ -186,6 +206,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
 
       dispatch(editIndexTaskReducer(newTasks));
       setFilteredTasks(newTasks);
+      handleDataEmitter(newTasks);
       return newTasks;
     });
   };

@@ -19,10 +19,15 @@ import { DangerProps } from '../../components/Input/Input';
 import { NewTask } from '../NotesPage/NotesPage';
 import {
   Description,
+  IList,
+  Task,
   editDescriptionReducer,
+  editListReducer,
   removeDescriptionReducer,
 } from '../../services/store/ITaskList/reducer';
 import { useAppSelector } from '../../hooks/redux';
+import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
+import socket from '../../services/socket/socket';
 
 type NavProps = RouteProps<'Description'>;
 
@@ -44,16 +49,44 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
     if (!Task) {
       navigation.navigate('Notes');
     }
+
+    socket.on('updatedList', (data: IList) => {
+      const newData = data.tasks.find((l) => l.id === Task?.id);
+      setDescription([...newData?.description!]);
+      dispatch(editListReducer(data));
+    });
     return () => {
       setDescription([]);
     };
-  }, [Task, navigation]);
+  }, []);
+
+  const handleDataEmitter = (data: Task) => {
+    const newTasks = [
+      ...selectList?.tasks.filter((t) => t.id !== data.id)!,
+      data,
+    ];
+    const emitter = {
+      id: selectList?.id!,
+      list: {
+        ...selectList?.list!,
+        updated_at: new Date().toISOString(),
+      },
+      tasks: newTasks,
+    };
+    handleEmmitterAndUpdatedListsShared(emitter);
+  };
 
   const handleUpateDateTask = (item: Description) => {
     const filter = description.filter((desc) => desc.id !== item.id);
     filter.unshift(item);
     setDescription(filter);
     dispatch(editDescriptionReducer(item));
+    const newTask: Task = {
+      ...Task!,
+      description: [...filter],
+    };
+
+    handleDataEmitter(newTask);
   };
 
   const handleColorBoder = useCallback(
@@ -76,17 +109,15 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
   const color = handleColorBoder(selectTask?.priority);
 
   const handleAddDescription = () => {
-    setDescription([
-      ...description,
-      {
-        id: generateUUID(),
-        type: 'input',
-        taskId: Task?.id!,
-        listId: Task?.listId!,
-        details: '',
-        title: titleInput.task,
-      },
-    ]);
+    const newDescription: Description = {
+      id: generateUUID(),
+      type: 'input',
+      taskId: Task?.id!,
+      listId: Task?.listId!,
+      details: '',
+      title: titleInput.task,
+    };
+    setDescription([...description, newDescription]);
     setTitleInput({
       task: '',
       priority: 'Baixa',
@@ -134,6 +165,11 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
 
             dispatch(removeDescriptionReducer(item));
             setDescription(filter);
+            const newTask: Task = {
+              ...Task!,
+              description: [...filter],
+            };
+            handleDataEmitter(newTask);
           },
         },
         {

@@ -23,11 +23,12 @@ import { useAppSelector } from '../../hooks/redux';
 import socket from '../../services/socket/socket';
 import {
   IList,
-  addListReducer,
-  addTaskReducer,
   editListReducer,
   removeListReducer,
 } from '../../services/store/ITaskList/reducer';
+import { userStorage } from '../../services/storage';
+import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
+import RNShare from 'react-native-share';
 
 type NavProps = RouteProps<'Main'>;
 
@@ -43,12 +44,35 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
     task: '',
     priority: 'Baixa',
   } as NewTask);
-  const [selectedList, setSelectedList] = useState(true);
+  const [selectedList, setSelectedList] = useState<'local' | 'share'>('local');
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const dispatch = useDispatch();
-
   const ItemSeparator = useCallback(() => {
     return <View style={{ height: 14 }} />;
+  }, []);
+
+  useEffect(() => {
+    setSharedKeys(Lists.filter((l) => l.list.shared));
+    setKeys(Lists.filter((l) => !l.list.shared));
+  }, [Lists]);
+
+  useEffect(() => {
+    const shareRoom = Lists.filter((l) => l.list.shared);
+    shareRoom.forEach((room) => {
+      socket.emit('room', room.id);
+    });
+
+    socket.on('initialList', (data: IList) => {
+      const findList = Lists.filter((lis) => lis.list.shared).find(
+        (li) => li.id === data.id,
+      );
+      if (
+        findList &&
+        new Date(findList.list.updated_at) < new Date(data.list.updated_at)
+      ) {
+        editListReducer(data);
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -66,16 +90,34 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
 
   const handleAddKeys = (item: string) => {
     if (
-      keys.some(
+      Lists.some(
         (k) =>
           k.list.key.toLocaleLowerCase().trim() ===
-          item.toLocaleLowerCase().trim(),
+            item.toLocaleLowerCase().trim() ||
+          k.id.toLocaleLowerCase().trim() === item.toLocaleLowerCase().trim(),
       )
     ) {
       return setDanger({
         value: true,
         message: 'Essa lista já existe!',
       });
+    }
+    if (
+      item.length === generateUUID().length &&
+      !Lists.some((k) => k.id === item)
+    ) {
+      socket.emit('room', item);
+      socket.on('initialList', (data: IList) => {
+        const newKey: IList = {
+          id: data.id,
+          list: data.list,
+          tasks: data.tasks,
+        };
+
+        setSharedKeys([...sharedKeys, newKey]);
+        dispatch(editListReducer(newKey));
+      });
+      return;
     }
 
     const newKey: IList = {
@@ -91,7 +133,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
     };
 
     setKeys([newKey, ...keys]);
-    dispatch(addListReducer(newKey));
+    dispatch(editListReducer(newKey));
   };
 
   const handleDeleteKey = (item: IList) => {
@@ -108,7 +150,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
         {
           text: 'OK',
           onPress: () => {
-            if (!selectedList) {
+            if (selectedList === 'share') {
               handleDeleteSharedKey(item);
             }
             handleDeleteKey(item);
@@ -134,17 +176,31 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
   }, []);
   const handleAddSharedList = (item: IList) => {
     const newItem: IList = {
-      ...item,
+      id: item.id,
       list: {
         ...item.list,
         shared: true,
+        owner: userStorage.getStorage('user'),
       },
+      tasks: [...item.tasks],
     };
     const filter = keys.filter((k) => k.id !== item.id);
     setKeys(filter);
     setSharedKeys([newItem, ...sharedKeys]);
     dispatch(editListReducer(newItem));
-    socket.emit('sharedList', newItem.id);
+    handleEmmitterAndUpdatedListsShared(newItem);
+  };
+
+  const handleSocketShare = (item: IList) => {
+    try {
+      RNShare.open({
+        type: 'text',
+        title: item.id,
+        message: `Copie e cole o id no app Notes para ter acesso a lista compartilhada!\n\n\n${item.id}`,
+      });
+    } catch (err) {
+      // error
+    }
   };
 
   const handleDeleteSharedKey = (item: IList) => {
@@ -186,16 +242,17 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            onPress={() => setSelectedList(true)}
+            onPress={() => setSelectedList('local')}
             style={{ flexDirection: 'row' }}
           >
             <Text
               style={[
                 styles.textRow,
                 {
-                  color: selectedList
-                    ? theme.colors.blue_dark
-                    : theme.colors.white,
+                  color:
+                    selectedList === 'local'
+                      ? theme.colors.blue_dark
+                      : theme.colors.white,
                 },
               ]}
             >
@@ -205,16 +262,17 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => setSelectedList(false)}
+            onPress={() => setSelectedList('share')}
             style={{ flexDirection: 'row' }}
           >
             <Text
               style={[
                 styles.textRow,
                 {
-                  color: selectedList
-                    ? theme.colors.white
-                    : theme.colors.purple_dark,
+                  color:
+                    selectedList === 'local'
+                      ? theme.colors.white
+                      : theme.colors.purple_dark,
                 },
               ]}
             >
@@ -225,7 +283,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
         </View>
 
         <FlatList
-          data={selectedList ? keys : sharedKeys}
+          data={selectedList === 'local' ? keys : sharedKeys}
           keyExtractor={(item, index) => index.toString()}
           style={{
             marginTop: '4%',
@@ -251,14 +309,17 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
               </Text>
               <View style={{ height: '100%', justifyContent: 'space-between' }}>
                 <Pressable
-                  onPress={() =>
-                    selectedList ? handleAddSharedList(item) : {}
-                  }
+                  onPress={() => {
+                    if (selectedList === 'local') {
+                      handleAddSharedList(item);
+                    }
+                    handleSocketShare(item);
+                  }}
                 >
                   {({ pressed }) => (
                     <Icon
-                      name={selectedList ? 'share' : 'sync'}
-                      type="materialicon"
+                      name={selectedList === 'local' ? 'share' : 'group-add'}
+                      type="materialicons"
                       size={24}
                       color={pressed ? theme.colors.danger : theme.colors.white}
                     />
