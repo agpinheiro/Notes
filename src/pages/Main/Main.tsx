@@ -325,6 +325,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
                   onPress={() => {
                     if (selectedList === 'local') {
                       handleAddSharedList(item);
+                      setSelectedList('share');
                     }
                     handleSocketShare(item);
                   }}
