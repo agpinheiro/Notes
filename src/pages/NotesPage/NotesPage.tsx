@@ -4,7 +4,7 @@ import Header, { Priority } from '../../components/Header/Header';
 import Container from '../../components/Cotainer/Container';
 import { RouteProps } from '../../routes/Routes';
 import { DangerProps } from '../../components/Input/Input';
-import { BackHandler } from 'react-native';
+import { BackHandler, TouchableOpacity, View } from 'react-native';
 import { generateUUID } from '../../utils/generateId';
 import ButtonFilter from '../../components/Filter/ButtonFilter';
 import Filter from '../../components/Filter/Filter';
@@ -44,7 +44,6 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const [filteredTasks, setFilteredTasks] = useState<Task[]>(
     FilterLists?.tasks || [],
   );
-  console.log(key);
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
   const [prioritySelected, setPrioritySelected] = useState<Priority>('Baixa');
   const [task, setTask] = useState<NewTask>({
@@ -71,6 +70,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     );
 
     socket.on('updatedList', (data: IList) => {
+      console.log(data);
       data.tasks.forEach((t) => {
         if (t.date && new Date(t.date) > new Date() && t.schedule && !t.done) {
           pushLocalSchedule({
@@ -232,6 +232,10 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     setFilteredTasks(filtered);
   };
 
+  const handleSyncSocket = (id: string) => {
+    socket.emit('syncList', id);
+  };
+
   return (
     <Container>
       <>
@@ -250,18 +254,35 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           prioritySelected={prioritySelected}
         />
         <Title createNumber={tasks.length} doneNumber={handleDoneNumber()} />
-        <ButtonFilter
-          setActiveFilter={setActiveFilter}
-          activeFilter={activeFilter}
-        />
-        {activeFilter && (
-          <Filter
-            onPress={(value: Priority | '') => {
-              handleFilter(value);
-              setActiveFilter(!activeFilter);
-            }}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: key.list.shared ? 'space-between' : 'flex-end',
+          }}
+        >
+          {key.list.shared && (
+            <ButtonFilter
+              title="Sincronizar"
+              type="ionicon"
+              icon="sync"
+              onPress={() => handleSyncSocket(key.id)}
+            />
+          )}
+          <ButtonFilter
+            title="Prioridade"
+            type="ionicon"
+            icon="filter"
+            onPress={() => setActiveFilter(!activeFilter)}
           />
-        )}
+          {activeFilter && (
+            <Filter
+              onPress={(value: Priority | '') => {
+                handleFilter(value);
+                setActiveFilter(!activeFilter);
+              }}
+            />
+          )}
+        </View>
         <ListComponent
           tasks={filteredTasks}
           onPress={(item: Task) => handleDeleteItem(item)}

@@ -1,23 +1,37 @@
 import { Icon } from '@rneui/themed';
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
 import { theme } from '../../theme/theme';
 
 interface Props {
-  activeFilter: boolean;
-  setActiveFilter: (value: boolean) => void | Dispatch<SetStateAction<boolean>>;
+  onPress: () => void;
+  icon: string;
+  type:
+    | 'material'
+    | 'material-community'
+    | 'simple-line-icon'
+    | 'zocial'
+    | 'font-awesome'
+    | 'octicon'
+    | 'ionicon'
+    | 'foundation'
+    | 'evilicon'
+    | 'entypo'
+    | 'antdesign'
+    | 'font-awesome-5';
+  title: string;
 }
 
-const ButtonFilter: React.FC<Props> = ({ activeFilter, setActiveFilter }) => {
+const ButtonFilter: React.FC<Props> = ({ onPress, icon, type, title }) => {
   return (
     <TouchableOpacity
       style={{
         flexDirection: 'row',
         alignSelf: 'flex-end',
-        marginRight: 20,
+        marginHorizontal: 20,
         marginTop: '3%',
       }}
-      onPress={() => setActiveFilter(!activeFilter)}
+      onPress={onPress}
     >
       <Text
         style={{
@@ -26,9 +40,9 @@ const ButtonFilter: React.FC<Props> = ({ activeFilter, setActiveFilter }) => {
           fontWeight: '600',
         }}
       >
-        Prioridade
+        {title}
       </Text>
-      <Icon name="filter" type="font-awesome" color={theme.colors.white} />
+      <Icon name={icon} type={type} color={theme.colors.white} />
     </TouchableOpacity>
   );
 };
