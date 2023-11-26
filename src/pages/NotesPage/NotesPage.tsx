@@ -273,6 +273,8 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           findList &&
           new Date(findList.list.updated_at) < new Date(data.list.updated_at)
         ) {
+          setTasks(data.tasks);
+          setFilteredTasks(data.tasks);
           dispatch(editIndexTaskReducer(data.tasks));
         }
       });
