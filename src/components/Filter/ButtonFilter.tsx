@@ -20,9 +20,16 @@ interface Props {
     | 'antdesign'
     | 'font-awesome-5';
   title: string;
+  color?: string;
 }
 
-const ButtonFilter: React.FC<Props> = ({ onPress, icon, type, title }) => {
+const ButtonFilter: React.FC<Props> = ({
+  onPress,
+  icon,
+  type,
+  title,
+  color = theme.colors.white,
+}) => {
   return (
     <TouchableOpacity
       style={{
@@ -35,14 +42,14 @@ const ButtonFilter: React.FC<Props> = ({ onPress, icon, type, title }) => {
     >
       <Text
         style={{
-          color: theme.colors.white,
+          color: color,
           marginRight: 10,
           fontWeight: '600',
         }}
       >
         {title}
       </Text>
-      <Icon name={icon} type={type} color={theme.colors.white} />
+      <Icon name={icon} type={type} color={color} />
     </TouchableOpacity>
   );
 };

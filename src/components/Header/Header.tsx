@@ -124,7 +124,7 @@ const Header: React.FC<Props> = ({
       )}
       <Overlay
         overlayStyle={{
-          backgroundColor: theme.colors.black,
+          backgroundColor: theme.colors.gray600,
           borderRadius: 10,
           paddingVertical: 26,
         }}
@@ -159,12 +159,35 @@ const Header: React.FC<Props> = ({
             borderRadius: 10,
             paddingHorizontal: 10,
             borderWidth: 1,
-            borderColor: theme.colors.purple_dark,
+            borderColor: theme.colors.blue,
           }}
           onChangeText={(value: string) =>
-            userStorage.setStorage('user', value)
+            userStorage.setStorage('temp', value)
           }
         />
+        <TouchableOpacity
+          onPress={() => {
+            setVisible(false);
+            userStorage.setStorage('user', userStorage.getStorage('temp'));
+          }}
+          style={{
+            backgroundColor: theme.colors.blue,
+            borderRadius: 10,
+            alignSelf: 'center',
+            marginTop: 20,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: '700',
+              color: theme.colors.white,
+              paddingVertical: 10,
+              paddingHorizontal: 30,
+            }}
+          >
+            Salvar
+          </Text>
+        </TouchableOpacity>
       </Overlay>
     </View>
   );

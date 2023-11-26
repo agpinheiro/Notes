@@ -29,6 +29,7 @@ import {
 import { userStorage } from '../../services/storage';
 import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
 import RNShare from 'react-native-share';
+import { token } from '../../config/index.json';
 
 type NavProps = RouteProps<'Main'>;
 
@@ -58,14 +59,13 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
 
   useEffect(() => {
     const shareRoom = Lists.filter((l) => l.list.shared);
+
     shareRoom.forEach((room) => {
       socket.emit('room', room.id);
     });
 
     socket.on('initialList', (data: IList) => {
-      const findList = Lists.filter((lis) => lis.list.shared).find(
-        (li) => li.id === data.id,
-      );
+      const findList = shareRoom.find((li) => li.id === data.id);
       if (
         findList &&
         new Date(findList.list.updated_at) < new Date(data.list.updated_at)

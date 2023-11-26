@@ -28,6 +28,7 @@ import {
 import { useAppSelector } from '../../hooks/redux';
 import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
 import socket from '../../services/socket/socket';
+import { token } from '../../config/index.json';
 
 type NavProps = RouteProps<'Description'>;
 
