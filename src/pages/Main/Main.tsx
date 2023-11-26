@@ -126,7 +126,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
         id: generateUUID(),
         key: item,
         shared: false,
-        owner: 'string',
+        owner: userStorage.getStorage('user'),
         updated_at: new Date().toISOString(),
       },
       tasks: [],
@@ -196,7 +196,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       RNShare.open({
         type: 'text',
         title: item.id,
-        message: `Copie e cole o id no app Notes para ter acesso a lista compartilhada!\n\n\n${item.id}`,
+        message: `Copie e cole o id da lista no app Notes para ter acesso a lista compartilhada!\n\nLista - *${item.list.key}*\n\nCriada por - *${item.list.owner}*\n\nID - *${item.id}*`,
       });
     } catch (err) {
       // error

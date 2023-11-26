@@ -4,7 +4,7 @@ import Header, { Priority } from '../../components/Header/Header';
 import Container from '../../components/Cotainer/Container';
 import { RouteProps } from '../../routes/Routes';
 import { DangerProps } from '../../components/Input/Input';
-import { BackHandler, TouchableOpacity, View } from 'react-native';
+import { BackHandler, View } from 'react-native';
 import { generateUUID } from '../../utils/generateId';
 import ButtonFilter from '../../components/Filter/ButtonFilter';
 import Filter from '../../components/Filter/Filter';
@@ -21,7 +21,6 @@ import ListComponent from './components/List/List';
 import {
   IList,
   Task,
-  addTaskReducer,
   editIndexTaskReducer,
   editListReducer,
   editTaskReducer,
@@ -70,7 +69,6 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     );
 
     socket.on('updatedList', (data: IList) => {
-      console.log(data);
       data.tasks.forEach((t) => {
         if (t.date && new Date(t.date) > new Date() && t.schedule && !t.done) {
           pushLocalSchedule({
@@ -232,7 +230,7 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     setFilteredTasks(filtered);
   };
 
-  const handleSyncSocket = (id: string) => {
+  const handleSyncSocket = async (id: string) => {
     socket.emit('syncList', id);
   };
 
@@ -265,7 +263,9 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
               title="Sincronizar"
               type="ionicon"
               icon="sync"
-              onPress={() => handleSyncSocket(key.id)}
+              onPress={() => {
+                handleSyncSocket(key.id);
+              }}
             />
           )}
           <ButtonFilter
