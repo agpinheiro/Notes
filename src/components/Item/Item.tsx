@@ -2,10 +2,10 @@ import React from 'react';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { theme } from '../../theme/theme';
 import { Icon } from '@rneui/themed';
-import { Task } from '../../pages/NotesPage/components/List/List';
 import SwipleBase from '../SwipleBase/SwipleBase';
 import { formatDate } from '../../utils/format';
 import { useNavigation } from '@react-navigation/native';
+import { Task } from '../../services/store/ITaskList/reducer';
 
 interface Props {
   item: Task;
@@ -70,7 +70,6 @@ const Item: React.FC<Props> = ({
   };
   const color: ColorProps = handleColor();
   const navigation = useNavigation();
-
   return (
     <SwipleBase
       width={open ? 0.2 : 0.4}
@@ -94,6 +93,19 @@ const Item: React.FC<Props> = ({
           borderColor: color.borderItem,
         }}
       >
+        <Text
+          style={{
+            color: theme.colors.white,
+            position: 'absolute',
+            top: 2,
+            left: 2,
+            marginLeft: 10,
+            fontSize: 12,
+          }}
+        >
+          {item.user}
+        </Text>
+
         {item.date && (
           <View
             style={{
@@ -104,7 +116,7 @@ const Item: React.FC<Props> = ({
               alignItems: 'center',
             }}
           >
-            {item.schedule && new Date() < item.date && (
+            {item.schedule && new Date() < new Date(item.date) && (
               <Icon
                 name="megaphone"
                 type="foundation"
@@ -119,7 +131,7 @@ const Item: React.FC<Props> = ({
                 fontSize: 12,
               }}
             >
-              {formatDate(item.date)}
+              {formatDate(new Date(item.date))}
             </Text>
           </View>
         )}

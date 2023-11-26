@@ -304,6 +304,19 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
               ]}
               onPress={() => navigation.navigate('Notes', { item: item })}
             >
+              <Text
+                style={{
+                  color: theme.colors.white,
+                  position: 'absolute',
+                  top: 2,
+                  left: 2,
+                  marginLeft: 10,
+                  fontSize: 12,
+                }}
+              >
+                {item.list.owner}
+              </Text>
+
               <Text numberOfLines={1} style={styles.textButtons}>
                 {item.list.key}
               </Text>

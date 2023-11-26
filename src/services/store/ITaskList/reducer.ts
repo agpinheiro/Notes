@@ -18,7 +18,7 @@ export interface Task {
   user: string;
   listId: string;
   priority: Priority;
-  date?: Date;
+  date?: string | Date;
   schedule: boolean;
   description: Description[];
   deleted: boolean;

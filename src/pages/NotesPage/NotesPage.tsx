@@ -70,6 +70,15 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     );
 
     socket.on('updatedList', (data: IList) => {
+      data.tasks.forEach((t) => {
+        if (t.date && new Date(t.date) > new Date() && t.schedule && !t.done) {
+          pushLocalSchedule({
+            item: t,
+            key: data.list.key,
+            date: new Date(t.date),
+          });
+        }
+      });
       setTasks(data.tasks);
       setFilteredTasks(data.tasks);
       dispatch(editListReducer(data));
@@ -176,14 +185,15 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   const handleUpateDateTask = (item: Task, date: Date) => {
     const updateTask: Task = {
       ...item,
-      date: date,
-      schedule: item.done ? false : true,
+      date: new Date(date).toISOString(),
+      schedule: !item.done,
       user: userStorage.getStorage('user'),
     };
     const newData = tasks.filter((t) => t.id !== item.id);
     newData.unshift(updateTask);
     setTasks(newData);
     setFilteredTasks(newData);
+    dispatch(editTaskReducer(updateTask));
     if (key.list.shared) {
       handleDataEmitter(newData);
     }
