@@ -33,7 +33,7 @@ import {
 import { userStorage } from '../../services/storage';
 import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
 import RNShare from 'react-native-share';
-import { token, url } from '../../config/index.json';
+import { token, uri } from '../../config/index.json';
 
 type NavProps = RouteProps<'Main'>;
 
@@ -273,7 +273,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       RNShare.open({
         type: 'text',
         title: item.id,
-        message: `Clique no link no link para ter acesso a lista compartilhada!\n\nLista - *${item.list.key}*\n\nCriada por - *${item.list.owner}\n\n${url}${item.id}`,
+        message: `Clique no link no link para ter acesso a lista compartilhada!\n\nLista - *${item.list.key}*\n\nCriada por - *${item.list.owner}*\n\n${uri}${item.id}`,
       });
     } catch (err) {
       // error
