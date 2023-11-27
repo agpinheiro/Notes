@@ -273,7 +273,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       RNShare.open({
         type: 'text',
         title: item.id,
-        message: `Copie e cole o id da lista no app Notes ou cline no link para ter acesso a lista compartilhada!\n\nLista - *${item.list.key}*\n\nCriada por - *${item.list.owner}*\n\nID - *${item.id}*\n\n${url}${item.id}`,
+        message: `Clique no link no link para ter acesso a lista compartilhada!\n\nLista - *${item.list.key}*\n\nCriada por - *${item.list.owner}\n\n${url}${item.id}`,
       });
     } catch (err) {
       // error
