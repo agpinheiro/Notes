@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
+  AppState,
+  AppStateStatus,
   BackHandler,
   FlatList,
   Pressable,
@@ -51,6 +53,53 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
   const ItemSeparator = useCallback(() => {
     return <View style={{ height: 14 }} />;
   }, []);
+
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        handleSyncSocket();
+      }
+    };
+    AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      (AppState as any).removeEventListener('change', handleAppStateChange);
+    };
+  }, []);
+
+  const handleSyncSocket = async () => {
+    socket.disconnect();
+
+    try {
+      await reconnectSocket();
+    } catch (error) {
+      console.error('Erro ao reconectar o socket:', error);
+      return;
+    }
+  };
+
+  const reconnectSocket = async () => {
+    try {
+      await socket.connect();
+      socket.emit('auth', token);
+      const shareRoom = Lists.filter((l) => l.list.shared);
+
+      shareRoom.forEach((room) => {
+        socket.emit('room', room.id);
+      });
+
+      socket.on('initialList', (data: IList) => {
+        const findList = shareRoom.find((li) => li.id === data.id);
+        if (
+          findList &&
+          new Date(findList.list.updated_at) < new Date(data.list.updated_at)
+        ) {
+          dispatch(editListReducer(data));
+        }
+      });
+    } catch (error) {
+      throw error;
+    }
+  };
 
   useEffect(() => {
     setSharedKeys(Lists.filter((l) => l.list.shared));
@@ -107,6 +156,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       !Lists.some((k) => k.id === item)
     ) {
       socket.emit('room', item);
+
       socket.on('initialList', (data: IList) => {
         const newKey: IList = {
           id: data.id,
