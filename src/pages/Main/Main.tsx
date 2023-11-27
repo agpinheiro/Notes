@@ -33,7 +33,7 @@ import {
 import { userStorage } from '../../services/storage';
 import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
 import RNShare from 'react-native-share';
-import { uri } from '../../config/index.json';
+import { uri, token } from '../../config/index.json';
 
 type NavProps = RouteProps<'Main'>;
 
@@ -51,6 +51,8 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
   } as NewTask);
   const [selectedList, setSelectedList] = useState<'local' | 'share'>('local');
   const [danger, setDanger] = useState<DangerProps>({} as DangerProps);
+  const [deepID, setDeepID] = useState('');
+  const [activeSocket, setActiveSocket] = useState(false);
   const dispatch = useDispatch();
   const ItemSeparator = useCallback(() => {
     return <View style={{ height: 14 }} />;
@@ -62,11 +64,22 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
   }, [Lists]);
 
   useEffect(() => {
+    if (deepID) {
+      const timeout = setTimeout(() => {
+        handleAddKeys(deepID);
+        setDeepID('');
+      }, 1000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [deepID]);
+
+  useEffect(() => {
     const handleDeepLink = ({ url }: { url: string }) => {
       const id = url.indexOf('id');
       const newList = url.substring(id + 3, url.length);
       if (newList) {
-        handleAddKeys(newList);
+        setDeepID(newList);
         setSelectedList('share');
       }
     };
@@ -102,7 +115,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
         dispatch(editListReducer(data));
       }
     });
-  }, []);
+  }, [activeSocket]);
 
   useEffect(() => {
     const backAction = () => {
@@ -116,6 +129,38 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
 
     return () => backHandler.remove();
   }, []);
+
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        handleSyncSocket();
+      }
+    };
+    AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      (AppState as any).removeEventListener('change', handleAppStateChange);
+    };
+  }, []);
+
+  const handleSyncSocket = async () => {
+    socket.disconnect();
+    try {
+      await reconnectSocket();
+    } catch (error) {
+      console.error('Erro ao reconectar o socket:', error);
+      return;
+    }
+  };
+
+  const reconnectSocket = async () => {
+    try {
+      await socket.connect();
+      socket.emit('auth', token);
+      setActiveSocket(!activeSocket);
+    } catch (error) {
+      throw error;
+    }
+  };
 
   const handleAddKeys = (item: string) => {
     if (
