@@ -5,6 +5,8 @@ import {
   AppStateStatus,
   BackHandler,
   FlatList,
+  Linking,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -31,7 +33,7 @@ import {
 import { userStorage } from '../../services/storage';
 import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
 import RNShare from 'react-native-share';
-import { token } from '../../config/index.json';
+import { token, url } from '../../config/index.json';
 
 type NavProps = RouteProps<'Main'>;
 
@@ -107,6 +109,31 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
   }, [Lists]);
 
   useEffect(() => {
+    const handleDeepLink = ({ url }: { url: string }) => {
+      const id = url.indexOf('id');
+      const newList = url.substring(id + 3, url.length);
+      if (newList) {
+        handleAddKeys(newList);
+        setSelectedList('share');
+      }
+    };
+
+    Linking.addEventListener('url', handleDeepLink);
+
+    if (Platform.OS === 'android') {
+      Linking.getInitialURL().then((url) => {
+        if (url) {
+          handleDeepLink({ url });
+        }
+      });
+    }
+
+    return () => {
+      Linking.removeAllListeners('url');
+    };
+  }, []);
+
+  useEffect(() => {
     const shareRoom = Lists.filter((l) => l.list.shared);
 
     shareRoom.forEach((room) => {
@@ -119,7 +146,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
         findList &&
         new Date(findList.list.updated_at) < new Date(data.list.updated_at)
       ) {
-        editListReducer(data);
+        dispatch(editListReducer(data));
       }
     });
   }, []);
@@ -246,7 +273,7 @@ const Main: React.FC<NavProps> = ({ navigation }) => {
       RNShare.open({
         type: 'text',
         title: item.id,
-        message: `Copie e cole o id da lista no app Notes para ter acesso a lista compartilhada!\n\nLista - *${item.list.key}*\n\nCriada por - *${item.list.owner}*\n\nID - *${item.id}*`,
+        message: `Copie e cole o id da lista no app Notes ou cline no link para ter acesso a lista compartilhada!\n\nLista - *${item.list.key}*\n\nCriada por - *${item.list.owner}*\n\nID - *${item.id}*\n\n${url}${item.id}`,
       });
     } catch (err) {
       // error

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, Platform, Linking } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { theme } from './theme/theme';
 import Routes from './routes/Routes';
@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import { store } from './services/store/store';
 import DeviceInfo from 'react-native-device-info';
 import { userStorage } from './services/storage';
+import socket from './services/socket/socket';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -29,6 +30,9 @@ const App: React.FC = () => {
     if (!userName || userName === 'User') {
       getDeviceName();
     }
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const getDeviceName = async () => {
