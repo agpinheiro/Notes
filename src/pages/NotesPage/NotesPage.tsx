@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Title from '../../components/Title/Title';
 import Header, { Priority } from '../../components/Header/Header';
 import Container from '../../components/Cotainer/Container';
-import { AppState, AppStateStatus } from 'react-native';
 import { RouteProps } from '../../routes/Routes';
 import { DangerProps } from '../../components/Input/Input';
 import { BackHandler, View } from 'react-native';
@@ -30,8 +29,6 @@ import {
 import { useAppSelector } from '../../hooks/redux';
 import { userStorage } from '../../services/storage';
 import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
-import { token } from '../../config/index.json';
-import { theme } from '../../theme/theme';
 
 type NavProps = RouteProps<'Notes'>;
 
@@ -59,18 +56,6 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
 
   useEffect(() => {
     requestPushNotificationPermission();
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      if (nextAppState === 'active') {
-        handleSyncSocket();
-      }
-    };
-    AppState.addEventListener('change', handleAppStateChange);
-    return () => {
-      (AppState as any).removeEventListener('change', handleAppStateChange);
-    };
-  }, []);
-
-  useEffect(() => {
     if (key.id === '') {
       navigation.navigate('Main');
     }
@@ -246,43 +231,6 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     setFilteredTasks(filtered);
   };
 
-  const handleSyncSocket = async () => {
-    socket.disconnect();
-
-    try {
-      await reconnectSocket();
-    } catch (error) {
-      console.error('Erro ao reconectar o socket:', error);
-      return;
-    }
-  };
-
-  const reconnectSocket = async () => {
-    try {
-      await socket.connect();
-      socket.emit('auth', token);
-      const shareRoom = ListsReducer.filter((l) => l.list.shared);
-
-      shareRoom.forEach((room) => {
-        socket.emit('room', room.id);
-      });
-
-      socket.on('initialList', (data: IList) => {
-        const findList = shareRoom.find((li) => li.id === data.id);
-        if (
-          findList &&
-          new Date(findList.list.updated_at) < new Date(data.list.updated_at)
-        ) {
-          setTasks(data.tasks);
-          setFilteredTasks(data.tasks);
-          dispatch(editIndexTaskReducer(data.tasks));
-        }
-      });
-    } catch (error) {
-      throw error;
-    }
-  };
-
   return (
     <Container>
       <>
@@ -299,29 +247,15 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
           priorityControl
           setPrioritySelected={setPrioritySelected}
           prioritySelected={prioritySelected}
+          navigation={navigation}
         />
         <Title createNumber={tasks.length} doneNumber={handleDoneNumber()} />
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: key.list.shared ? 'space-between' : 'flex-end',
+            justifyContent: 'flex-end',
           }}
         >
-          {key.list.shared && (
-            <ButtonFilter
-              title="Sincronizar"
-              type="ionicon"
-              icon="sync"
-              color={
-                !socket.active || !socket.connected
-                  ? theme.colors.blue_dark
-                  : theme.colors.white
-              }
-              onPress={() => {
-                handleSyncSocket(key.id);
-              }}
-            />
-          )}
           <ButtonFilter
             title="Prioridade"
             type="ionicon"

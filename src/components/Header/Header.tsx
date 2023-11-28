@@ -3,7 +3,6 @@ import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Input, { InputProps } from '../Input/Input';
 import { theme } from '../../theme/theme';
 import { Icon, Overlay } from '@rneui/themed';
-import { useNavigation } from '@react-navigation/native';
 import CheckboxComponent from '../CheckboxComponent/CheckboxComponent';
 import { TextInput } from 'react-native-gesture-handler';
 import { userStorage } from '../../services/storage';
@@ -18,6 +17,7 @@ interface Props extends InputProps {
   ) => void | Dispatch<SetStateAction<Priority>>;
   prioritySelected?: Priority;
   route?: 'Main' | 'Notes' | 'Description';
+  navigation: any;
 }
 
 export type Priority = 'Baixa' | 'Media' | 'Alta';
@@ -31,12 +31,12 @@ const Header: React.FC<Props> = ({
   arrow = true,
   placeholder,
   danger,
-  route = 'Main',
   setDanger,
   setPrioritySelected,
   prioritySelected = 'Baixa',
+  navigation,
+  route = 'Main',
 }) => {
-  const navigation = useNavigation();
   const [visible, setVisible] = useState(false);
   return (
     <View style={styles.container}>

@@ -28,18 +28,18 @@ import {
 import { useAppSelector } from '../../hooks/redux';
 import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
 import socket from '../../services/socket/socket';
-import { token } from '../../config/index.json';
 
 type NavProps = RouteProps<'Description'>;
 
 const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
-  const Task = route.params?.item;
+  const TaskRoute = route.params?.item;
   const Lists = useAppSelector((state) => state.ITaskList);
-  const selectList = Lists.find((l) => l.list.id === Task?.listId);
-  const selectTask = selectList?.tasks.find((t) => t.id === Task?.id);
+  const selectList = Lists.find((l) => l.list.id === TaskRoute?.listId);
+  const selectTask = selectList?.tasks.find((t) => t.id === TaskRoute?.id);
   const [description, setDescription] = useState<Description[]>(
     selectTask?.description || [],
   );
+
   const [titleInput, setTitleInput] = useState<NewTask>({
     task: '',
     priority: 'Baixa',
@@ -47,7 +47,7 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!Task) {
+    if (!TaskRoute) {
       navigation.navigate('Notes');
     }
 
@@ -83,7 +83,7 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
     setDescription(filter);
     dispatch(editDescriptionReducer(item));
     const newTask: Task = {
-      ...Task!,
+      ...TaskRoute!,
       description: [...filter],
     };
 
@@ -113,8 +113,8 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
     const newDescription: Description = {
       id: generateUUID(),
       type: 'input',
-      taskId: Task?.id!,
-      listId: Task?.listId!,
+      taskId: TaskRoute?.id!,
+      listId: TaskRoute?.listId!,
       details: '',
       title: titleInput.task,
     };
@@ -167,7 +167,7 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
             dispatch(removeDescriptionReducer(item));
             setDescription(filter);
             const newTask: Task = {
-              ...Task!,
+              ...TaskRoute!,
               description: [...filter],
             };
             handleDataEmitter(newTask);
@@ -197,6 +197,7 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
         placeholder="Adcione informações à nota"
         danger={danger}
         setDanger={setDanger}
+        navigation={navigation}
       />
       <Text
         style={{
@@ -208,7 +209,7 @@ const DescriptionPage: React.FC<NavProps> = ({ route, navigation }) => {
           marginTop: '10%',
         }}
       >
-        Nota: {Task?.task}
+        Nota: {TaskRoute?.task}
       </Text>
       <FlatList
         data={description}
