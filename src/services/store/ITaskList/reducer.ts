@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { localStorage } from '../../storage';
-import socket from '../../socket/socket';
-import { handleEmitterAndUpdatedListsShared } from '../../socket/handleEmmitter';
+import { handleReplacementItem } from '../../../utils/handleArrays';
 
 export interface List {
   id: string;
@@ -56,9 +55,9 @@ const reducerSlice = createSlice({
       return state;
     },
     editListReducer: (state, action: PayloadAction<IList>) => {
-      const data = state.filter((list) => list.id !== action.payload.id);
+      const index = state.indexOf(action.payload);
       action.payload.list.updated_at = new Date().toISOString();
-      data.unshift(action.payload);
+      const data = handleReplacementItem(state, index, action.payload);
       localStorage.setStorage('content', data);
       return data;
     },
@@ -71,7 +70,7 @@ const reducerSlice = createSlice({
       state.forEach((list) => {
         if (list.list.id === action.payload.listId) {
           list.list.updated_at = new Date().toISOString();
-          list.tasks.push(action.payload);
+          list.tasks.unshift(action.payload);
         }
       });
       localStorage.setStorage('content', state);
@@ -80,11 +79,9 @@ const reducerSlice = createSlice({
     editTaskReducer: (state, action: PayloadAction<Task>) => {
       state.forEach((list) => {
         if (list.list.id === action.payload.listId) {
-          const data = list.tasks.filter(
-            (task) => task.id !== action.payload.id,
-          );
+          const index = list.tasks.indexOf(action.payload);
           list.list.updated_at = new Date().toISOString();
-          data.push(action.payload);
+          const data = handleReplacementItem(list.tasks, index, action.payload);
           list.tasks = data;
         }
       });
@@ -103,10 +100,9 @@ const reducerSlice = createSlice({
     removeTasksReducer: (state, action: PayloadAction<Task>) => {
       state.forEach((list) => {
         if (list.list.id === action.payload.listId) {
-          const data = list.tasks.filter(
-            (task) => task.id !== action.payload.id,
-          );
+          const index = list.tasks.indexOf(action.payload);
           list.list.updated_at = new Date().toISOString();
+          const data = handleReplacementItem(list.tasks, index, action.payload);
           list.tasks = data;
         }
       });
@@ -118,7 +114,7 @@ const reducerSlice = createSlice({
         if (list.list.id === action.payload.listId) {
           list.tasks.forEach((task) => {
             if (task.id === action.payload.taskId) {
-              task.description.push(action.payload);
+              task.description.unshift(action.payload);
               list.list.updated_at = new Date().toISOString();
             }
           });
@@ -132,10 +128,14 @@ const reducerSlice = createSlice({
         if (list.list.id === action.payload.listId) {
           list.tasks.forEach((task) => {
             if (task.id === action.payload.taskId) {
-              const data = task.description.filter(
-                (desc) => desc.id !== action.payload.id,
+              const index = task.description.indexOf(action.payload);
+
+              const data = handleReplacementItem(
+                task.description,
+                index,
+                action.payload,
               );
-              data.push(action.payload);
+
               task.description = data;
               list.list.updated_at = new Date().toISOString();
             }

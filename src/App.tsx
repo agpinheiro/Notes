@@ -1,5 +1,10 @@
-import React, { useEffect } from 'react';
-import { StatusBar, AppState, AppStateStatus } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  StatusBar,
+  AppState,
+  AppStateStatus,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { theme } from './theme/theme';
 import Routes from './routes/Routes';
@@ -8,12 +13,14 @@ import PushNotification from 'react-native-push-notification';
 import { Provider } from 'react-redux';
 import { store } from './services/store/store';
 import DeviceInfo from 'react-native-device-info';
-import { localStorage, userStorage } from './services/storage';
+import { controlStorage, localStorage, userStorage } from './services/storage';
 import socket from './services/socket/socket';
 import { token } from './config/index.json';
 import { IList } from './services/store/ITaskList/reducer';
+import { Overlay } from '@rneui/themed';
 
 const App: React.FC = () => {
+  const [active, setActive] = useState(false);
   useEffect(() => {
     PushNotification.createChannel(
       {
@@ -36,13 +43,18 @@ const App: React.FC = () => {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       if (nextAppState === 'background') {
         socket.disconnect();
+        controlStorage.setStorage(false);
+        setActive(true);
       } else {
         socket.connect();
         socket.emit('auth', token);
         const tasks: IList[] = localStorage.getStorage('content');
         tasks.forEach((room) => {
           socket.emit('room', room.id);
+          socket.emit('syncList', room.id);
         });
+        controlStorage.setStorage(true);
+        setActive(false);
       }
     };
     const appCurrentState = AppState.addEventListener(
@@ -67,6 +79,19 @@ const App: React.FC = () => {
         <Provider store={store}>
           <StatusBar backgroundColor={theme.colors.black} />
           <Routes />
+          <Overlay
+            overlayStyle={{
+              backgroundColor: 'transparent',
+              borderColor: 'transparent',
+              shadowColor: 'transparent',
+            }}
+            isVisible={active}
+          >
+            <ActivityIndicator
+              size={theme.screnn.w * 0.3}
+              color={theme.colors.purple}
+            />
+          </Overlay>
         </Provider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -27,7 +27,7 @@ import {
   removeTasksReducer,
 } from '../../services/store/ITaskList/reducer';
 import { useAppSelector } from '../../hooks/redux';
-import { userStorage } from '../../services/storage';
+import { controlStorage, userStorage } from '../../services/storage';
 import { handleEmmitterAndUpdatedListsShared } from '../../services/socket/handleEmmitter';
 
 type NavProps = RouteProps<'Notes'>;
@@ -70,17 +70,10 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
     );
 
     socket.on('updatedList', (data: IList) => {
-      data.tasks.forEach((t) => {
-        if (t.date && new Date(t.date) > new Date() && t.schedule && !t.done) {
-          pushLocalSchedule({
-            item: t,
-            key: data.list.key,
-            date: new Date(t.date),
-          });
-        }
-      });
-      setTasks(data.tasks);
-      setFilteredTasks(data.tasks);
+      if (data.id === Lists.id) {
+        setTasks(data.tasks);
+        setFilteredTasks(data.tasks);
+      }
       dispatch(editListReducer(data));
     });
 
@@ -120,6 +113,9 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   };
 
   const handleAddToStorage = () => {
+    if (!controlStorage.getStorage()) {
+      return;
+    }
     const newTask: Task = {
       id: generateUUID(),
       task: task.task,
@@ -146,6 +142,9 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   };
 
   const handleDeleteItem = (item: Task) => {
+    if (!controlStorage.getStorage()) {
+      return;
+    }
     const newData = tasks.filter((t) => t.id !== item.id);
     setTasks(newData);
     setFilteredTasks(newData);
@@ -160,6 +159,9 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   };
 
   const handleUpateDoneTask = (item: Task) => {
+    if (!controlStorage.getStorage()) {
+      return;
+    }
     PushNotification.getScheduledLocalNotifications((notifys) => {
       const deleteNotify = notifys.find((notify) => notify.id === item.id);
       if (deleteNotify) {
@@ -184,6 +186,9 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   };
 
   const handleUpateDateTask = (item: Task, date: Date) => {
+    if (!controlStorage.getStorage()) {
+      return;
+    }
     const updateTask: Task = {
       ...item,
       date: new Date(date).toISOString(),
@@ -201,6 +206,9 @@ const NotesPage: React.FC<NavProps> = ({ route, navigation }) => {
   };
 
   const handleReindex = (item: Task, index: number) => {
+    if (!controlStorage.getStorage()) {
+      return;
+    }
     const currentIndex = tasks.findIndex((t) => t.id === item.id);
     if (
       (currentIndex <= 0 && index === 1) ||

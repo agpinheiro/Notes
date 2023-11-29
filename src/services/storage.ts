@@ -32,4 +32,18 @@ const userStorage = {
   },
 };
 
-export { localStorage, userStorage };
+const controlStorage = {
+  setStorage: (data: boolean) => {
+    storage.set('control', JSON.stringify(data));
+  },
+  getStorage: (): boolean => {
+    const data = storage.getString('control');
+    if (data) {
+      const control: boolean = JSON.parse(data);
+      return control;
+    }
+    return false;
+  },
+};
+
+export { localStorage, userStorage, controlStorage };
